@@ -41,8 +41,8 @@ Determines whether or not a given byte is valid to include into the rom.
 */
 bool GenesisCorruption::valid_byte(uint8_t byte, uint32_t location)
 {
-  if (is_branch(Util::read_big<uint16_t>(rom, location)) ||
-    is_branch(Util::read_big<uint16_t>(rom, location - 1)))
+  if (is_branch(util::read_big<uint16_t>(rom, location)) ||
+    is_branch(util::read_big<uint16_t>(rom, location - 1)))
   {
     return true;
   }
@@ -105,6 +105,34 @@ void GenesisCorruption::save(std::string filename)
   rom[0x18E] = (cs & 0xFF00) >> 8;
   rom[0x18F] = (cs & 0xFF);
 
+  //  Patch the vector table
+  for (int i = 8; i < 0x100; i += 4)
+  {
+    //  Ignore 0x00, 0x04, 0x70 and 0x78
+
+    if (i == 0x40)
+    {
+      //  Actual patch goes in 0x40-0x48
+      rom[i] = 0x54;
+      rom[i + 1] = 0x8F;
+      rom[i + 2] = 0x54;
+      rom[i + 3] = 0x97;
+      rom[i + 4] = 0x55;
+      rom[i + 5] = 0x8F;
+      rom[i + 6] = 0x4E;
+      rom[i + 7] = 0x73;
+      i += 4;
+    }
+    else if (i != 0x70 && i != 0x78)
+    {
+      //  Any other section besides 0x70 and 0x78 points to the patch at 0x40
+      rom[i] = 0;
+      rom[i + 1] = 0;
+      rom[i + 2] = 0;
+      rom[i + 3] = 0x40;
+    }
+  }
+
   try
   {
     if (info->save_file() != "")
@@ -138,7 +166,7 @@ uint16_t GenesisCorruption::checksum()
     sum += rom[i++];
   }
 
-  debug::cout << "Checksum: " << std::hex << sum << std::dec << std::endl;
+  //debug::cout << "Checksum: " << std::hex << sum << std::dec << std::endl;
 
   return sum;
 }

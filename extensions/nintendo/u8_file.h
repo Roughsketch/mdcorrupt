@@ -145,7 +145,7 @@ namespace u8
 
     static inline bool match(std::vector<uint8_t>& data)
     {
-      return Util::read_big<uint32_t>(data) == 0x55AA382D;
+      return util::read_big<uint32_t>(data) == 0x55AA382D;
     }
   private:
     std::unique_ptr<CorruptionInfo> info;

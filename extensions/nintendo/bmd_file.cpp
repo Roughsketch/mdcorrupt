@@ -6,27 +6,27 @@ namespace bmd
   {
     INFHeader::INFHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + INFHeader::Offset::Magic, 4);
-      m_size = Util::read_big<uint32_t>(data, offset + INFHeader::Offset::Size);
-      m_unknown1 = Util::read_big<uint16_t>(data, offset + INFHeader::Offset::Unknown1);
-      m_pad = Util::read_big<uint16_t>(data, offset + INFHeader::Offset::Padding);
-      m_unknown2 = Util::read_big<uint32_t>(data, offset + INFHeader::Offset::Unknown2);
-      m_vertex_count = Util::read_big<uint32_t>(data, offset + INFHeader::Offset::VertexCount);
-      m_data_offset = Util::read_big<uint32_t>(data, offset + INFHeader::Offset::DataOffset);
+      m_magic = util::read(data, offset + INFHeader::Offset::Magic, 4);
+      m_size = util::read_big<uint32_t>(data, offset + INFHeader::Offset::Size);
+      m_unknown1 = util::read_big<uint16_t>(data, offset + INFHeader::Offset::Unknown1);
+      m_pad = util::read_big<uint16_t>(data, offset + INFHeader::Offset::Padding);
+      m_unknown2 = util::read_big<uint32_t>(data, offset + INFHeader::Offset::Unknown2);
+      m_vertex_count = util::read_big<uint32_t>(data, offset + INFHeader::Offset::VertexCount);
+      m_data_offset = util::read_big<uint32_t>(data, offset + INFHeader::Offset::DataOffset);
 
       m_header_offset = offset;
     }
 
     VTXHeader::VTXHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + VTXHeader::Offset::Magic, 4);
-      m_size = Util::read_big<uint32_t>(data, offset + VTXHeader::Offset::Size);
-      m_array_fmt_offset = Util::read_big<uint32_t>(data, offset + VTXHeader::Offset::ArrayFormat);
+      m_magic = util::read(data, offset + VTXHeader::Offset::Magic, 4);
+      m_size = util::read_big<uint32_t>(data, offset + VTXHeader::Offset::Size);
+      m_array_fmt_offset = util::read_big<uint32_t>(data, offset + VTXHeader::Offset::ArrayFormat);
 
       //  Read in each of the 13 offsets
       for (int i = 0; i < 13; i++)
       {
-        m_offsets[i] = Util::read_big<uint32_t>(data, offset + VTXHeader::Offset::Offsets + (i * 4));
+        m_offsets[i] = util::read_big<uint32_t>(data, offset + VTXHeader::Offset::Offsets + (i * 4));
       }
 
       m_header_offset = offset;
@@ -34,15 +34,15 @@ namespace bmd
 
     EVPHeader::EVPHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + EVPHeader::Offset::Magic, 4);
-      m_size = Util::read_big<uint32_t>(data, offset + EVPHeader::Offset::Size);
-      m_count = Util::read_big<uint16_t>(data, offset + EVPHeader::Offset::Count);
-      m_pad = Util::read_big<uint16_t>(data, offset + EVPHeader::Offset::Padding);
+      m_magic = util::read(data, offset + EVPHeader::Offset::Magic, 4);
+      m_size = util::read_big<uint32_t>(data, offset + EVPHeader::Offset::Size);
+      m_count = util::read_big<uint16_t>(data, offset + EVPHeader::Offset::Count);
+      m_pad = util::read_big<uint16_t>(data, offset + EVPHeader::Offset::Padding);
 
       //  Read in each of the 4 offsets
       for (int i = 0; i < 4; i++)
       {
-        m_offsets[i] = Util::read_big<uint32_t>(data, offset + EVPHeader::Offset::Offsets + (i * 4));
+        m_offsets[i] = util::read_big<uint32_t>(data, offset + EVPHeader::Offset::Offsets + (i * 4));
       }
 
       m_header_offset = offset;
@@ -50,53 +50,53 @@ namespace bmd
 
     DRWHeader::DRWHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + DRWHeader::Offset::Magic, 4);
-      m_size = Util::read_big<uint32_t>(data, offset + DRWHeader::Offset::Size);
-      m_count = Util::read_big<uint16_t>(data, offset + DRWHeader::Offset::Count);
-      m_pad = Util::read_big<uint16_t>(data, offset + DRWHeader::Offset::Padding);
-      m_offset_weighted = Util::read_big<uint32_t>(data, offset + DRWHeader::Offset::Weight);
-      m_data_offset = Util::read_big<uint32_t>(data, offset + DRWHeader::Offset::Data);
+      m_magic = util::read(data, offset + DRWHeader::Offset::Magic, 4);
+      m_size = util::read_big<uint32_t>(data, offset + DRWHeader::Offset::Size);
+      m_count = util::read_big<uint16_t>(data, offset + DRWHeader::Offset::Count);
+      m_pad = util::read_big<uint16_t>(data, offset + DRWHeader::Offset::Padding);
+      m_offset_weighted = util::read_big<uint32_t>(data, offset + DRWHeader::Offset::Weight);
+      m_data_offset = util::read_big<uint32_t>(data, offset + DRWHeader::Offset::Data);
 
       m_header_offset = offset;
     }
 
     JNTHeader::JNTHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + JNTHeader::Offset::Magic, 4);
-      m_size = Util::read_big<uint32_t>(data, offset + JNTHeader::Offset::Size);
-      m_count = Util::read_big<uint16_t>(data, offset + JNTHeader::Offset::Count);
-      m_pad = Util::read_big<uint16_t>(data, offset + JNTHeader::Offset::Padding);
-      m_joint_offset = Util::read_big<uint32_t>(data, offset + JNTHeader::Offset::Joint);
-      m_unknown = Util::read_big<uint32_t>(data, offset + JNTHeader::Offset::Unknown);
-      m_string_table = Util::read_big<uint32_t>(data, offset + JNTHeader::Offset::StringTable);
+      m_magic = util::read(data, offset + JNTHeader::Offset::Magic, 4);
+      m_size = util::read_big<uint32_t>(data, offset + JNTHeader::Offset::Size);
+      m_count = util::read_big<uint16_t>(data, offset + JNTHeader::Offset::Count);
+      m_pad = util::read_big<uint16_t>(data, offset + JNTHeader::Offset::Padding);
+      m_joint_offset = util::read_big<uint32_t>(data, offset + JNTHeader::Offset::Joint);
+      m_unknown = util::read_big<uint32_t>(data, offset + JNTHeader::Offset::Unknown);
+      m_string_table = util::read_big<uint32_t>(data, offset + JNTHeader::Offset::StringTable);
 
       m_header_offset = offset;
     }
 
     SHPHeader::SHPHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + SHPHeader::Offset::Magic, 4);
-      m_size = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::Size);
-      m_count = Util::read_big<uint16_t>(data, offset + SHPHeader::Offset::Count);
-      m_pad = Util::read_big<uint16_t>(data, offset + SHPHeader::Offset::Padding);
-      m_batch_offset = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::Batch);
-      unknown = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::Unknown);
-      zero = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::Zero);
-      m_attrib_offset = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::AttributesOffset);
-      m_matrix_offset = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::MatrixOffset);
-      m_data_offset = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::DataOffset);
-      m_matrix_data_offset = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::MatrixData);
-      m_packet_data_offset = Util::read_big<uint32_t>(data, offset + SHPHeader::Offset::PacketData);
+      m_magic = util::read(data, offset + SHPHeader::Offset::Magic, 4);
+      m_size = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::Size);
+      m_count = util::read_big<uint16_t>(data, offset + SHPHeader::Offset::Count);
+      m_pad = util::read_big<uint16_t>(data, offset + SHPHeader::Offset::Padding);
+      m_batch_offset = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::Batch);
+      unknown = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::Unknown);
+      zero = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::Zero);
+      m_attrib_offset = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::AttributesOffset);
+      m_matrix_offset = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::MatrixOffset);
+      m_data_offset = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::DataOffset);
+      m_matrix_data_offset = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::MatrixData);
+      m_packet_data_offset = util::read_big<uint32_t>(data, offset + SHPHeader::Offset::PacketData);
 
       m_header_offset = offset;
     }
 
     MATHeader::MATHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + MATHeader::Offset::Magic, 4);
-      m_size = Util::read_big<uint32_t>(data, offset + MATHeader::Offset::Size);
-      m_count = Util::read_big<uint16_t>(data, offset + MATHeader::Offset::Count);
-      m_pad = Util::read_big<uint16_t>(data, offset + MATHeader::Offset::Padding);
+      m_magic = util::read(data, offset + MATHeader::Offset::Magic, 4);
+      m_size = util::read_big<uint32_t>(data, offset + MATHeader::Offset::Size);
+      m_count = util::read_big<uint16_t>(data, offset + MATHeader::Offset::Count);
+      m_pad = util::read_big<uint16_t>(data, offset + MATHeader::Offset::Padding);
 
 
       /*
@@ -108,7 +108,7 @@ namespace bmd
       */
       for (int i = 0; i < 30; i++)
       {
-        m_offsets[i] = Util::read_big<uint32_t>(data, offset + MATHeader::Offset::Offsets + (i * 4));
+        m_offsets[i] = util::read_big<uint32_t>(data, offset + MATHeader::Offset::Offsets + (i * 4));
       }
 
       m_header_offset = offset;
@@ -116,11 +116,11 @@ namespace bmd
 
     TEXHeader::TEXHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + TEXHeader::Offset::Magic, 4);
-      m_size = Util::read_big<uint32_t>(data, offset + TEXHeader::Offset::Size);
-      m_num_images = Util::read_big<uint16_t>(data, offset + TEXHeader::Offset::Images);
-      m_unknown = Util::read_big<uint16_t>(data, offset + TEXHeader::Offset::Unknown);
-      m_tex_offset = Util::read_big<uint32_t>(data, offset + TEXHeader::Offset::TextureOffset);
+      m_magic = util::read(data, offset + TEXHeader::Offset::Magic, 4);
+      m_size = util::read_big<uint32_t>(data, offset + TEXHeader::Offset::Size);
+      m_num_images = util::read_big<uint16_t>(data, offset + TEXHeader::Offset::Images);
+      m_unknown = util::read_big<uint16_t>(data, offset + TEXHeader::Offset::Unknown);
+      m_tex_offset = util::read_big<uint32_t>(data, offset + TEXHeader::Offset::TextureOffset);
 
       //  For each image read in the BTI header
       for (int i = 0; i < m_num_images; i++)
@@ -133,8 +133,8 @@ namespace bmd
 
     Header::Header(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + Header::Offset::Magic, 8);
-      m_size = Util::read<uint32_t>(data, offset + Header::Offset::Size);
+      m_magic = util::read(data, offset + Header::Offset::Magic, 8);
+      m_size = util::read<uint32_t>(data, offset + Header::Offset::Size);
 
       offset += 0x20; //  So far seems to always be 0x20?
 
@@ -164,8 +164,8 @@ namespace bmd
 
     BMTHeader::BMTHeader(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read(data, offset + BMTHeader::Offset::Magic, 8);
-      m_size = Util::read<uint32_t>(data, offset + BMTHeader::Offset::Size);
+      m_magic = util::read(data, offset + BMTHeader::Offset::Magic, 8);
+      m_size = util::read<uint32_t>(data, offset + BMTHeader::Offset::Size);
 
       offset += 0x20; //  So far seems to always be 0x20?
 
@@ -213,7 +213,7 @@ namespace bmd
 
   void BMTFile::corrupt(std::vector<uint8_t>& data, std::vector<std::string>& args)
   {
-    auto header = std::make_unique<detail::BMTHeader>(data, 0x20);
+    auto header = std::make_unique<detail::BMTHeader>(data, 0);
 
     std::vector<uint8_t> mat(data.begin() + header->mat_begin(), data.begin() + header->mat_end());
     NintendoFile::corrupt(mat, args);

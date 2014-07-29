@@ -11,7 +11,7 @@
 #include <cstdint>
 
 #include "gbc_except.h"
-#include "helpers.h"
+#include "util.h"
 
 namespace GBCOffset
 {

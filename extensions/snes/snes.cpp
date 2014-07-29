@@ -114,7 +114,7 @@ bool SNESCorruption::valid_byte(uint8_t byte, uint32_t location)
       if (this->rom[location - i] == sta)
       {
         //  If opcode is found, determine whether or not it contains an important register value
-        if (SNESCorruption::is_register(Util::read<uint16_t>(ref(rom), location - i)))
+        if (SNESCorruption::is_register(util::read<uint16_t>(ref(rom), location - i)))
         {
           //  If it contains an important register then it isn't safe to overwrite.
           return false;

@@ -2,7 +2,6 @@
   This is an extremely hacked together class that provides extremely basic debug logging.
 
   Not recommended for anything serious. This is an abomination.
-*/
 
 #ifndef _CORRUPTER_LOG_H
 #define _CORRUPTER_LOG_H
@@ -78,3 +77,5 @@ namespace
 }
 
 #endif
+
+*/

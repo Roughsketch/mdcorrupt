@@ -60,7 +60,7 @@ void NDSCorruption::corrupt()
     }
     catch (...)
     {
-      debug::cout << "Could not find file '" << file << "'" << std::endl;
+      //debug::cout << "Could not find file '" << file << "'" << std::endl;
       continue;
     }
 
@@ -129,7 +129,7 @@ void NDSCorruption::corrupt()
       }
       else if (info->type() == CorruptionType::RotateLeft)
       {
-        uint8_t rotate = Util::rol<uint8_t>(rom[i], info->value());
+        uint8_t rotate = util::rol<uint8_t>(rom[i], info->value());
 
         if (valid_byte(rotate, i))
         {
@@ -139,7 +139,7 @@ void NDSCorruption::corrupt()
       }
       else if (info->type() == CorruptionType::RotateRight)
       {
-        uint8_t rotate = Util::ror<uint8_t>(rom[i], info->value());
+        uint8_t rotate = util::ror<uint8_t>(rom[i], info->value());
 
         if (valid_byte(rotate, i))
         {
@@ -203,7 +203,7 @@ bool NDSCorruption::valid()
 bool NDSCorruption::valid_byte(uint8_t byte, uint32_t location)
 {
   //  Entire instruction is at location of the nearest 4 byte boundary
-  uint32_t instruction = Util::read<uint32_t>(ref(rom), location - (location % 4));
+  uint32_t instruction = util::read<uint32_t>(ref(rom), location - (location % 4));
 
   /*
     Format for ARM9 instructions:

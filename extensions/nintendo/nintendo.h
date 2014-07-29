@@ -10,6 +10,7 @@
 #include "corrupt.h"
 #include "log.h"
 #include "yaz0.h"
+#include "yay0.h"
 
 struct Corrupter
 {

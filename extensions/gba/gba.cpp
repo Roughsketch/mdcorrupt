@@ -35,7 +35,7 @@ bool GBACorruption::valid()
 bool GBACorruption::valid_byte(uint8_t byte, uint32_t location)
 {
   //  Entire instruction is at location of the nearest 4 byte boundary
-  uint32_t instruction = Util::read<uint32_t>(ref(rom), location - (location % 4));
+  uint32_t instruction = util::read<uint32_t>(ref(rom), location - (location % 4));
 
   /*
   Format for ARM7 instructions:

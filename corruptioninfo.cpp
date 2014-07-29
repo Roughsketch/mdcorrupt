@@ -33,26 +33,26 @@ CorruptionInfo::CorruptionInfo(std::vector<std::string>& args)
 
     if (arg == "-s" || arg == "--step")
     {
-      m_step = Util::to_int32(args[++i]);
+      m_step = util::to_int32(args[++i]);
     }
     else if (arg == "-h" || arg == "--shift")
     {
-      m_value = m_value = Util::to_int32(args[++i]);
+      m_value = m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::Shift;
     }
     else if (arg == "-w" || arg == "--swap")
     {
-      m_value = m_value = Util::to_int32(args[++i]);
+      m_value = m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::Swap;
     }
     else if (arg == "-a" || arg == "--add")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::Add;
     }
     else if (arg == "-t" || arg == "--set")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::Set;
     }
     else if (arg == "-r" || arg == "--random")
@@ -61,27 +61,27 @@ CorruptionInfo::CorruptionInfo(std::vector<std::string>& args)
     }
     else if (arg == "--rotate-left")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::RotateLeft;
     }
     else if (arg == "--rotate-right")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::RotateRight;
     }
     else if (arg == "--logical-and")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::LogicalAnd;
     }
     else if (arg == "--logical-or")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::LogicalOr;
     }
     else if (arg == "--logical-xor")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::LogicalXor;
     }
     else if (arg == "--logical-complement")
@@ -90,11 +90,11 @@ CorruptionInfo::CorruptionInfo(std::vector<std::string>& args)
     }
     else if (arg == "-b" || arg == "--start")
     {
-      m_start = Util::to_int32(args[++i]);
+      m_start = util::to_int32(args[++i]);
     }
     else if (arg == "-e" || arg == "--stop")
     {
-      m_end = Util::to_int32(args[++i]);
+      m_end = util::to_int32(args[++i]);
     }
     else if (arg == "-o" || arg == "--out")
     {

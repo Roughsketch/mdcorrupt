@@ -6,7 +6,7 @@
 
 #include "n64_except.h"
 
-#include "helpers.h"
+#include "util.h"
 
 namespace N64Offset
 {

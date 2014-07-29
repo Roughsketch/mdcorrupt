@@ -44,76 +44,76 @@ NESCorruptionInfo::NESCorruptionInfo(std::vector<std::string>& args)
 
     if (arg == "-s" || arg == "--step")
     {
-      m_step = Util::to_int32(args[++i]);
+      m_step = util::to_int32(args[++i]);
     }
     else if (arg == "-ps" || arg == "--prg-step")
     {
-      m_prg_step = Util::to_int32(args[++i]);
+      m_prg_step = util::to_int32(args[++i]);
       m_prg = true;
     }
     else if (arg == "-cs" || arg == "--chr-step")
     {
-      m_chr_step = Util::to_int32(args[++i]);
+      m_chr_step = util::to_int32(args[++i]);
       m_chr = true;
     }
     else if (arg == "-h" || arg == "--shift")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::Shift;
     }
     else if (arg == "-ph" || arg == "--prg-shift")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::Shift;
     }
     else if (arg == "-ch" || arg == "--chr-shift")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::Shift;
     }
     else if (arg == "-w" || arg == "--swap")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::Swap;
     }
     else if (arg == "-pw" || arg == "--prg-swap")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::Swap;
     }
     else if (arg == "-cw" || arg == "--chr-swap")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::Swap;
     }
     else if (arg == "-a" || arg == "--add")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::Add;
     }
     else if (arg == "-pa" || arg == "--prg-add")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::Add;
     }
     else if (arg == "-ca" || arg == "--chr-add")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::Add;
     }
     else if (arg == "-t" || arg == "--set")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::Set;
     }
     else if (arg == "-pt" || arg == "--prg-set")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::Set;
     }
     else if (arg == "-ct" || arg == "--chr-set")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::Set;
     }
     else if (arg == "-r" || arg == "--random")
@@ -130,77 +130,77 @@ NESCorruptionInfo::NESCorruptionInfo(std::vector<std::string>& args)
     }
     else if (arg == "--rotate-left")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::RotateLeft;
     }
     else if (arg == "--prg-bitshift-left")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::RotateLeft;
     }
     else if (arg == "--chr-bitshift-left")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::RotateLeft;
     }
     else if (arg == "--rotate-right")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::RotateRight;
     }
     else if (arg == "--prg-bitshift-right")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::RotateRight;
     }
     else if (arg == "--chr-bitshift-right")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::RotateRight;
     }
     else if (arg == "--logical-and")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::LogicalAnd;
     }
     else if (arg == "--prg-logical-and")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::LogicalAnd;
     }
     else if (arg == "--chr-logical-and")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::LogicalAnd;
     }
     else if (arg == "--logical-or")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::LogicalOr;
     }
     else if (arg == "--prg-logical-or")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::LogicalOr;
     }
     else if (arg == "--chr-logical-or")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::LogicalOr;
     }
     else if (arg == "--logical-xor")
     {
-      m_value = Util::to_int32(args[++i]);
+      m_value = util::to_int32(args[++i]);
       m_type = CorruptionType::LogicalXor;
     }
     else if (arg == "--prg-logical-xor")
     {
-      m_prg_value = Util::to_int32(args[++i]);
+      m_prg_value = util::to_int32(args[++i]);
       m_prg_type = CorruptionType::LogicalXor;
     }
     else if (arg == "--chr-logical-xor")
     {
-      m_chr_value = Util::to_int32(args[++i]);
+      m_chr_value = util::to_int32(args[++i]);
       m_chr_type = CorruptionType::LogicalXor;
     }
     else if (arg == "--logical-complement")
@@ -217,23 +217,23 @@ NESCorruptionInfo::NESCorruptionInfo(std::vector<std::string>& args)
     }
     else if (arg == "-pb" || arg == "--prg-start")
     {
-      m_prg_start = Util::to_int32(args[++i]);
+      m_prg_start = util::to_int32(args[++i]);
     }
     else if (arg == "-cb" || arg == "--chr-start")
     {
-      m_chr_start = Util::to_int32(args[++i]);
+      m_chr_start = util::to_int32(args[++i]);
     }
     else if (arg == "-e" || arg == "--stop")
     {
-      m_end = Util::to_int32(args[++i]);
+      m_end = util::to_int32(args[++i]);
     }
     else if (arg == "-pe" || arg == "--prg-stop")
     {
-      m_prg_end = Util::to_int32(args[++i]);
+      m_prg_end = util::to_int32(args[++i]);
     }
     else if (arg == "-ce" || arg == "--chr-stop")
     {
-      m_chr_end = Util::to_int32(args[++i]);
+      m_chr_end = util::to_int32(args[++i]);
     }
     else if (arg == "-o" || arg == "--out")
     {

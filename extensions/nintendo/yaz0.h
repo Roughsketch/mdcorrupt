@@ -25,7 +25,7 @@
 #include <cstdint>
 
 
-#include "helpers.h"
+#include "util.h"
 
 namespace yaz0
 {
@@ -37,13 +37,34 @@ namespace yaz0
       uint32_t dstPos;
     };
 
+    struct EncodingState
+    {
+      EncodingState() : numBytes1(0), matchPos(0), prevFlag(0) {};
+
+      uint32_t numBytes1;
+      uint32_t matchPos;
+      int prevFlag = 0;
+    };
+
     uint32_t toDWORD(uint32_t d);
 
     // simple and straight encoding scheme for Yaz0
     uint32_t simpleEnc(uint8_t* src, uint32_t size, uint32_t pos, uint32_t *pMatchPos);
 
     // a lookahead encoding scheme for ngc Yaz0
-    uint32_t nintendoEnc(uint8_t* src, uint32_t size, uint32_t pos, uint32_t *pMatchPos); 
+    //uint32_t nintendoEnc(uint8_t* src, uint32_t size, uint32_t pos, uint32_t *pMatchPos);
+
+
+    class Encoder
+    {
+    public:
+      Encoder() {};
+      uint32_t nintendoEnc(const std::vector<uint8_t>& src, uint32_t size, uint32_t pos, uint32_t& pMatchPos);
+    private:
+      uint32_t numBytes1;
+      uint32_t matchPos;
+      int prevFlag;
+    };
     
     Ret decodeYaz0(uint8_t* src, uint32_t srcSize, uint8_t* dst, uint32_t uncompressedSize);
 
@@ -53,6 +74,13 @@ namespace yaz0
   std::vector<uint8_t> decode(std::string filename);
   std::vector<uint8_t> encode(std::vector<uint8_t>& src);
   std::vector<uint8_t> decode(std::vector<uint8_t>& src);
+
+
+  class Decoder
+  {
+    Decoder(std::string filename);
+    Decoder(std::vector<uint8_t>& src);
+  };
 }
 
 #endif

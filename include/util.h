@@ -12,33 +12,58 @@
 #include <cstdint>
 #include <vector>
 
-namespace Util
+namespace util
 {
-  inline std::vector<uint8_t> read_file(std::string filename)
+  inline std::vector<uint8_t> read_file(std::string filename, size_t count = std::numeric_limits<size_t>::max(), size_t offset = 0)
   {
-    std::ifstream ifs(filename, std::ios::binary);
+    if (count == 0)
+    {
+      return std::vector<uint8_t>();
+    }
 
-    ifs.seekg(0, std::ios::end);
-    auto filesize = ifs.tellg();
-    ifs.seekg(0);
+    FILE *fp = fopen(filename.c_str(), "rb");
 
-    std::vector<uint8_t> content(static_cast<uint32_t>(filesize));
+    if (!fp)
+    {
+      return std::vector<uint8_t>();
+    }
 
-    ifs.read(reinterpret_cast<char *>(&content[0]), filesize);
-    ifs.close();
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    rewind(fp);
 
-    return content;
+    if (count < size)
+    {
+      size = count;
+    }
+
+    fseek(fp, offset, SEEK_SET);
+
+    std::vector<uint8_t> ret(size);
+    fread(&ret[0], sizeof(uint8_t), size, fp);
+    fclose(fp);
+
+    return ret;
   }
 
-  inline void write_file(std::string filename, std::vector<uint8_t>& data)
+  inline void write_file(std::string filename, std::vector<uint8_t>& data, uint32_t count = 0)
   {
-    std::ofstream ofs(filename, std::ios::binary);
-    ofs.write(reinterpret_cast<char *>(&data[0]), data.size());
-    ofs.close();
+    FILE *fp = fopen(filename.c_str(), "wb");
+
+    if (fp && (data.size() > 0))
+    {
+      fwrite(&data[0], sizeof(data[0]), count ? count : data.size(), fp);
+      fclose(fp);
+    }
   }
 
-  template <typename T> inline T read(std::vector<uint8_t>& data, uint32_t offset = 0)
+  template <typename T> inline T read(const std::vector<uint8_t>& data, uint32_t offset = 0)
   {
+    if (data.size() < offset + sizeof(T))
+    {
+      return 0;
+    }
+
     static_assert(std::is_integral<T>::value, "Value must be an integral type.");
     T ret = 0;
 
@@ -51,8 +76,13 @@ namespace Util
     return ret;
   }
 
-  template <typename T> inline T read_big(std::vector<uint8_t>& data, uint32_t offset = 0)
+  template <typename T> inline T read_big(const std::vector<uint8_t>& data, uint32_t offset = 0)
   {
+    if (data.size() < offset + sizeof(T))
+    {
+      return 0;
+    }
+
     static_assert(std::is_integral<T>::value, "Value must be an integral type.");
     T ret = 0;
 
@@ -65,8 +95,13 @@ namespace Util
     return ret;
   }
 
-  inline std::string read(std::vector<uint8_t>& data, uint32_t offset, size_t size = 0)
+  inline std::string read(const std::vector<uint8_t>& data, uint32_t offset, size_t size = 0)
   {
+    if (data.size() < offset + size)
+    {
+      return "";
+    }
+
     uint32_t length = size;
 
     //  If length is 0 then try to find the next null
@@ -145,7 +180,7 @@ namespace Util
     return x >> (n % (sizeof(x)* 8)) | x << ((sizeof(x)* 8) - (n % (sizeof(x)* 8)));
   }
 
-  template<typename T, typename A> std::vector<T, A> subset(std::vector<T, A>& v, uint32_t start, uint32_t count)
+  template<typename T, typename A> inline std::vector<T, A> subset(const std::vector<T, A>& v, uint32_t start, uint32_t count)
   {
     return std::vector<T, A>(v.begin() + start, v.begin() + start + count);
   }

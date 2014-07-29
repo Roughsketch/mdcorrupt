@@ -20,8 +20,8 @@ NDSFileSystem::~NDSFileSystem()
 void NDSFileSystem::initialize(std::vector<uint8_t>& rom, std::unique_ptr<NDSHeader>& header)
 {
   std::cout << "FNT Offset: " << std::hex << header->file_name_table() << std::dec << std::endl;
-  uint16_t dir_total = Util::read<uint16_t>(ref(rom), header->file_name_table() + 6);
-  uint16_t first_id = Util::read<uint16_t>(ref(rom), header->file_name_table() + 4);
+  uint16_t dir_total = util::read<uint16_t>(ref(rom), header->file_name_table() + 6);
+  uint16_t first_id = util::read<uint16_t>(ref(rom), header->file_name_table() + 4);
   std::cout << "Initializing NDS File System. " << dir_total << " directories found." << std::endl;
 
   std::vector<std::string> current_directory = { "." };
@@ -57,13 +57,13 @@ void NDSFileSystem::initialize(std::vector<uint8_t>& rom, std::unique_ptr<NDSHea
       //  If length is 0x01 to 0x7F then it is a file entry
       if (len > 0x00 && len < 0x80)
       {
-        entry = Util::read(rom, offset + 1, len);     //  Get the file name
+        entry = util::read(rom, offset + 1, len);     //  Get the file name
         entry = current_directory[dir_index] + "/" + entry; //  Prepend the directory structure before the file name
         offset += len + 1;                                  //  Offset increase by length byte + file name length
 
         //  File Allocation Table holds pairs of integers noting start and end offsets into the rom.
-        uint32_t file_start = Util::read<uint32_t>(rom, header->file_alloc_table() + file_id * 8);
-        uint32_t file_end = Util::read<uint32_t>(rom, header->file_alloc_table() + file_id * 8 + 4);
+        uint32_t file_start = util::read<uint32_t>(rom, header->file_alloc_table() + file_id * 8);
+        uint32_t file_end = util::read<uint32_t>(rom, header->file_alloc_table() + file_id * 8 + 4);
 
         //  Create new NDSEntry with file start offset and file size and store it into the entries map
         m_entries[entry] = NDSEntry(file_start, file_end - file_start);
@@ -77,10 +77,10 @@ void NDSFileSystem::initialize(std::vector<uint8_t>& rom, std::unique_ptr<NDSHea
       else if (len > 0x80)
       {
         len -= 0x80;  //  Subtract 0x80 to get directory name length
-        entry = Util::read(rom, offset + 1, len); //  Get the directory name
+        entry = util::read(rom, offset + 1, len); //  Get the directory name
 
         //  Directories have an extra 2 bytes indicating the directory id
-        uint16_t id = Util::read<uint16_t>(rom, offset + len + 1) & 0x0FFF; //  id is in form 0xFXXX so and it with 0xFFF
+        uint16_t id = util::read<uint16_t>(rom, offset + len + 1) & 0x0FFF; //  id is in form 0xFXXX so and it with 0xFFF
 
         offset += len + 3;  //  Increase offset by length byte + 2 bytes for id + name length
 

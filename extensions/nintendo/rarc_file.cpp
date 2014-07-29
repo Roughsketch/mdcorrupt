@@ -7,47 +7,47 @@ namespace rarc
     FileEntry::FileEntry() { }
     FileEntry::FileEntry(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_id = Util::read_big<uint16_t>(data, offset + FileEntryOffset::ID);
-      unknown1 = Util::read_big<uint16_t>(data, offset + FileEntryOffset::Unknown1);
-      unknown2 = Util::read_big<uint16_t>(data, offset + FileEntryOffset::Unknown2);
-      string_offset = Util::read_big<uint16_t>(data, offset + FileEntryOffset::StringTableOffset);
-      data_offset = Util::read_big<uint32_t>(data, offset + FileEntryOffset::DataOffset);
-      data_size = Util::read_big<uint32_t>(data, offset + FileEntryOffset::DataSize);
-      zero = Util::read_big<uint32_t>(data, offset + FileEntryOffset::Zero);
+      m_id = util::read_big<uint16_t>(data, offset + FileEntryOffset::ID);
+      unknown1 = util::read_big<uint16_t>(data, offset + FileEntryOffset::Unknown1);
+      unknown2 = util::read_big<uint16_t>(data, offset + FileEntryOffset::Unknown2);
+      string_offset = util::read_big<uint16_t>(data, offset + FileEntryOffset::StringTableOffset);
+      data_offset = util::read_big<uint32_t>(data, offset + FileEntryOffset::DataOffset);
+      data_size = util::read_big<uint32_t>(data, offset + FileEntryOffset::DataSize);
+      zero = util::read_big<uint32_t>(data, offset + FileEntryOffset::Zero);
     }
 
     Header::Header(std::vector<uint8_t>& data, uint32_t offset)
     {
       //  Set up header data
-      magic = Util::read(data, offset + HeaderOffset::Magic, 4);
-      size = Util::read_big<uint32_t>(data, offset + HeaderOffset::Size);
-      unknown1 = Util::read_big<uint32_t>(data, offset + HeaderOffset::Unknown1);
-      data_start = Util::read_big<uint32_t>(data, offset + HeaderOffset::DataStart);
+      magic = util::read(data, offset + HeaderOffset::Magic, 4);
+      size = util::read_big<uint32_t>(data, offset + HeaderOffset::Size);
+      unknown1 = util::read_big<uint32_t>(data, offset + HeaderOffset::Unknown1);
+      data_start = util::read_big<uint32_t>(data, offset + HeaderOffset::DataStart);
 
       for (int i = 0; i < 16; i++)
       {
         unknown2[i] = data[offset + HeaderOffset::Unknown2 + i];
       }
 
-      num_nodes = Util::read_big<uint32_t>(data, offset + HeaderOffset::Nodes);
-      unknown3 = Util::read_big<uint32_t>(data, offset + HeaderOffset::Unknown3);
-      num_files = Util::read_big<uint32_t>(data, offset + HeaderOffset::TotalFiles);
-      file_entries_offset = Util::read_big<uint32_t>(data, offset + HeaderOffset::FileEntryOffset);
-      unknown4 = Util::read_big<uint32_t>(data, offset + HeaderOffset::Unknown4);
-      str_table_offset = Util::read_big<uint32_t>(data, offset + HeaderOffset::StringTableOffset);
-      unknown5 = Util::read_big<uint64_t>(data, offset + HeaderOffset::Unknown5);
+      num_nodes = util::read_big<uint32_t>(data, offset + HeaderOffset::Nodes);
+      unknown3 = util::read_big<uint32_t>(data, offset + HeaderOffset::Unknown3);
+      num_files = util::read_big<uint32_t>(data, offset + HeaderOffset::TotalFiles);
+      file_entries_offset = util::read_big<uint32_t>(data, offset + HeaderOffset::FileEntryOffset);
+      unknown4 = util::read_big<uint32_t>(data, offset + HeaderOffset::Unknown4);
+      str_table_offset = util::read_big<uint32_t>(data, offset + HeaderOffset::StringTableOffset);
+      unknown5 = util::read_big<uint64_t>(data, offset + HeaderOffset::Unknown5);
     }
 
     Node::Node(std::vector<uint8_t>& data, std::unique_ptr<detail::Header>& header, uint32_t offset, std::string parent)
     {
-      type = Util::read(data, offset + NodeOffset::Type, 4);
-      string_offset = Util::read_big<uint32_t>(data, offset + NodeOffset::StringTableOffset);
-      unknown = Util::read_big<uint16_t>(data, offset + NodeOffset::Unknown);
-      file_entries = Util::read_big<uint16_t>(data, offset + NodeOffset::FileEntries);
-      file_offset = Util::read_big<uint32_t>(data, offset + NodeOffset::FileStartOffset);
+      type = util::read(data, offset + NodeOffset::Type, 4);
+      string_offset = util::read_big<uint32_t>(data, offset + NodeOffset::StringTableOffset);
+      unknown = util::read_big<uint16_t>(data, offset + NodeOffset::Unknown);
+      file_entries = util::read_big<uint16_t>(data, offset + NodeOffset::FileEntries);
+      file_offset = util::read_big<uint32_t>(data, offset + NodeOffset::FileStartOffset);
 
       //  Read name from the string table
-      name = Util::read(data, header->string_table() + string_offset);
+      name = util::read(data, header->string_table() + string_offset);
 
       uint32_t subdirs = 0;
 
@@ -55,7 +55,7 @@ namespace rarc
       {
         //  Create FileEntry
         FileEntry entry = detail::FileEntry(data, (file_offset * 0x14) + header->file_table() + (i * 0x14));
-        std::string entry_name = Util::read(data, header->string_table() + entry.name_offset());
+        std::string entry_name = util::read(data, header->string_table() + entry.name_offset());
         std::string path = parent + name + "/" + entry_name;
 
         //  Only add if it's not a . or .. directory
@@ -80,9 +80,12 @@ namespace rarc
   {
     info = std::make_unique<CorruptionInfo>(args);
     header = std::make_unique<detail::Header>(data);
-   
-    //  Push back one node which is (always?) the main directory
-    nodes.push_back(detail::Node(data, header, 0x40));
+
+    //  Push back all nodes
+    for (int i = 0; i < header->node_count(); i++)
+    {
+      nodes.push_back(detail::Node(data, header, 0x40 + (i * 0x10)));
+    }
 
     //  Compact all the file entry data into a single map for easier access
     for (auto& node : nodes)
@@ -147,16 +150,16 @@ namespace rarc
     {
       detail::FileEntry entry = e.second;
       uint32_t offset = header->start() + entry.offset();
+
+      if (data.size() < offset + entry.size())
+      {
+        continue;
+      }
+
       std::vector<uint8_t> filedata(data.begin() + offset, data.begin() + offset + entry.size());
 
-      /*
-      std::ofstream ofs(entry.name(), std::ios::binary);
-      ofs.write(reinterpret_cast<char *>(&filedata[0]), entry.size());
-      ofs.close();
-      */
-
-      //  If the file is Yaz0 compressed then ignore it since the sizes most likely won't match
-      if (Util::read(filedata, 0, 4) != "Yaz0")
+      //  If the file is Yay0 or Yaz0 compressed then ignore it since the sizes most likely won't match
+      if (filedata.size() > 4 && util::read(filedata, 0, 4) != "Yaz0" && util::read(filedata, 0, 4) != "Yay0")
       {
         //  Since RARC files are archives of Nintendo files, corrupt it with Nintendo file protection
         NintendoFile::start(filedata, arguments);

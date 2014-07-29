@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "helpers.h"
+#include "util.h"
 
 namespace GBAOffset
 {
@@ -46,22 +46,22 @@ private:
 
 inline uint32_t GBAHeader::entry_point()
 {
-  return Util::read<uint32_t>(ref(header), GBAOffset::Entry);
+  return util::read<uint32_t>(ref(header), GBAOffset::Entry);
 }
 
 inline std::string GBAHeader::title()
 {
-  return Util::read(ref(header), GBAOffset::Title, 12);
+  return util::read(ref(header), GBAOffset::Title, 12);
 }
 
 inline std::string GBAHeader::game_code()
 {
-  return Util::read(ref(header), GBAOffset::GameCode, 4);
+  return util::read(ref(header), GBAOffset::GameCode, 4);
 }
 
 inline std::string GBAHeader::maker_code()
 {
-  return Util::read(ref(header), GBAOffset::MakerCode, 2);
+  return util::read(ref(header), GBAOffset::MakerCode, 2);
 }
 
 inline uint8_t GBAHeader::software_version()

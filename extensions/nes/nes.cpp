@@ -62,7 +62,7 @@ void NESCorruption::corrupt()
 
 void NESCorruption::corrupt_prg()
 {
-  debug::cout << "PRG Type: " << info->prg_type() << std::endl;
+  //debug::cout << "PRG Type: " << info->prg_type() << std::endl;
 
   uint32_t corruptions = 0;
   std::uniform_int_distribution<int> dist(0x00, 0xFF);
@@ -123,7 +123,7 @@ void NESCorruption::corrupt_prg()
     }
     else if (info->prg_type() == CorruptionType::RotateLeft)
     {
-      uint8_t rotate = Util::rol<uint8_t>(this->rom[i], info->prg_value());
+      uint8_t rotate = util::rol<uint8_t>(this->rom[i], info->prg_value());
 
       if (valid_byte(rotate, i))
       {
@@ -133,7 +133,7 @@ void NESCorruption::corrupt_prg()
     }
     else if (info->prg_type() == CorruptionType::RotateRight)
     {
-      uint8_t rotate = Util::ror<uint8_t>(this->rom[i], info->prg_value());
+      uint8_t rotate = util::ror<uint8_t>(this->rom[i], info->prg_value());
 
       if (valid_byte(rotate, i))
       {
@@ -189,7 +189,7 @@ void NESCorruption::corrupt_chr()
     return;
   }
 
-  debug::cout << "CHR Type: " << info->chr_type() << std::endl;
+  //debug::cout << "CHR Type: " << info->chr_type() << std::endl;
 
   uint32_t corruptions = 0;
   std::uniform_int_distribution<int> dist(0x00, 0xFF);
@@ -251,7 +251,7 @@ void NESCorruption::corrupt_chr()
       corruptions++;
       for (uint32_t index = i; index < rom.size() && index < i + 8; index++)
       {
-        this->rom[index] = Util::rol(this->rom[index], info->chr_value());
+        this->rom[index] = util::rol(this->rom[index], info->chr_value());
       }
     }
     else if (info->chr_type() == CorruptionType::RotateRight)
@@ -259,7 +259,7 @@ void NESCorruption::corrupt_chr()
       corruptions++;
       for (uint32_t index = i; index < rom.size() && index < i + 8; index++)
       {
-        this->rom[index] = Util::ror(this->rom[index], info->chr_value());
+        this->rom[index] = util::ror(this->rom[index], info->chr_value());
       }
     }
     else if (info->chr_type() == CorruptionType::LogicalAnd)
@@ -424,7 +424,7 @@ void NESCorruption::save(std::string filename)
   {
     if (info->save_file() != "")
     {
-      debug::cout << "Saving to " << info->save_file() << std::endl;
+      //debug::cout << "Saving to " << info->save_file() << std::endl;
       this->rom_file.open(info->save_file(), std::ios::out | std::ios::binary);
       this->save_name = info->save_file();
     }

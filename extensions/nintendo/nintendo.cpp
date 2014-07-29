@@ -1,5 +1,7 @@
 #include "nintendo.h"
 
+#include "timer.h"
+
 using namespace rarc;
 using namespace bck;
 using namespace bmd;
@@ -8,7 +10,8 @@ using namespace u8;
 
 std::vector<uint8_t> NintendoFile::start(std::string filename, std::vector<std::string>& args)
 {
-  return start(Util::read_file(filename), args, filename);
+  return start(util::read_file(filename), args, filename);
+  //return start(std::vector<uint8_t>(), args, filename);
 }
 
 std::vector<uint8_t> NintendoFile::start(std::vector<uint8_t>& data, std::vector<std::string>& args, std::string filename)
@@ -24,73 +27,97 @@ std::vector<uint8_t> NintendoFile::start(std::vector<uint8_t>& data, std::vector
   candidates.push_back(Corrupter(U8File::corrupt, U8File::match));
   */
 
-  bool yaz0 = Util::read(data, 0, 4) == "Yaz0";
+  uint64_t current = 0;
+
+  if (data.size() < 4)
+  {
+    return data;
+  }
+
+  bool yaz0 = util::read(data, 0, 4) == "Yaz0";
+  bool yay0 = util::read(data, 0, 4) == "Yay0";
 
   if (yaz0)
   {
     data = yaz0::decode(data);
   }
 
-  std::string magic = Util::read(data, 0, 4);
-
-  std::cout << "Magic is " << magic << std::endl;
-
-  if (magic == "RARC")
+  if (yay0)
   {
-    auto rarc = std::make_unique<RARCFile>(data, args);
-    data = rarc->corrupt();
-    //rarc->save(filename);
-  }
-  else if (magic == "J3D1")
-  {
-    //  For lack of a better approach, similar J3D1-header files will use BCKFile
-    if (Util::read(data, 4, 4) == "bck1" ||
-        Util::read(data, 4, 4) == "btk1")
-    {
-      BCKFile::corrupt(data, args);
-    }
-    else if (Util::read(data, 4, 4) == "btp1")
-    {
-      //  BTP only needs to jump 0x20 bytes before corrupting
-      BTPFile::corrupt(data, args);
-    }
-  }
-  else if (magic == "J3D2")
-  {
-    if (Util::read(data, 4, 4) == "bmd3")
-    {
-      BMDFile::corrupt(data, args);
-    }
-    else if (Util::read(data, 4, 4) == "bmt3")
-    {
-      //  Just a MAT block of a BMD file
-      BMTFile::corrupt(data, args);
-    }
-  }
-  else if (Util::read_big<uint32_t>(data) == 0x55AA382D)
-  {
-    U8File::corrupt(data, args);
-  }
-  else
-  {
-    debug::cout << "No match for file: " << std::hex << Util::read<uint32_t>(data) << "\t" << Util::read<uint32_t>(data, 4) << std::dec << std::endl;
-    NintendoFile::corrupt(data, args);
+    data = yay0::decode(data);
   }
 
+  std::string magic = util::read(data, 0, 4);
+
+  try
+  {
+    if (magic == "RARC")
+    {
+      auto rarc = std::make_unique<RARCFile>(data, args);
+      data = rarc->corrupt();
+    }
+    else if (magic == "J3D1")
+    {
+      //  For lack of a better approach, similar J3D1-header files will use BCKFile
+      if (util::read(data, 4, 4) == "bck1" ||
+          util::read(data, 4, 4) == "btk1")
+      {
+        BCKFile::corrupt(data, args);
+      }
+      else if (util::read(data, 4, 4) == "btp1")
+      {
+        //  BTP only needs to jump 0x20 bytes before corrupting
+        BTPFile::corrupt(data, args);
+      }
+    }
+    else if (magic == "J3D2")
+    {
+      if (util::read(data, 4, 4) == "bmd3")
+      {
+        BMDFile::corrupt(data, args);
+      }
+      else if (util::read(data, 4, 4) == "bmt3")
+      {
+        //  Just a MAT block of a BMD file
+        BMTFile::corrupt(data, args);
+      }
+    }
+    else if (util::read_big<uint32_t>(data) == 0x55AA382D)
+    {
+      U8File::corrupt(data, args);
+    }
+    else
+    {
+      NintendoFile::corrupt(data, args);
+    }
+  }
+  catch (...)
+  {
+    std::cout << "Error corrupting '" << filename << "'" << std::endl;
+  }
+
+  /*
+    Decoding is disabled for now
   if (yaz0)
   {
-    data = yaz0::encode(data);
+    //std::cout << "Yaz0 Encoding... ";
+    //data = yaz0::encode(data);
+    //std::cout << "Done" << std::endl;
   }
+  */
 
   auto info = std::make_unique<CorruptionInfo>(args);
 
-  if (info->save_file() != "")
+  if (filename != "")
   {
-    Util::write_file(info->save_file(), data);
-  }
-  else
-  {
-    Util::write_file(filename, data);
+    if (info->save_file() != "")
+    {
+      util::write_file(info->save_file(), data);
+    }
+    else
+    {
+      util::write_file(filename, data);
+    }
   }
 
   return data;
@@ -98,7 +125,6 @@ std::vector<uint8_t> NintendoFile::start(std::vector<uint8_t>& data, std::vector
 
 void NintendoFile::corrupt(std::vector<uint8_t>& data, std::vector<std::string>& args)
 {
-  debug::cout << "Starting Nintendo data block corruption" << std::endl;
   auto info = std::make_unique<CorruptionInfo>(args);
   uint32_t corruptions = 0;
 
@@ -111,9 +137,9 @@ void NintendoFile::corrupt(std::vector<uint8_t>& data, std::vector<std::string>&
   std::seed_seq seed(v.begin(), v.end());
   random.seed(seed);
 
-  for (uint32_t i = info->start();    // Start at header + start value
-    i <= data.size() && i < info->end(); // While in a valid range
-    i += info->step())                                     // Increase by step size
+  for (uint32_t i = info->start();        // Start at header + start value
+    i < data.size() && i < info->end();   // While in a valid range
+    i += info->step())                    // Increase by step size
   {
     if (info->type() == CorruptionType::Shift)
     {
@@ -153,14 +179,14 @@ void NintendoFile::corrupt(std::vector<uint8_t>& data, std::vector<std::string>&
     }
     else if (info->type() == CorruptionType::RotateLeft)
     {
-      uint8_t rotate = Util::rol<uint8_t>(data[i], info->value());
+      uint8_t rotate = util::rol<uint8_t>(data[i], info->value());
 
       data[i] = rotate;
       corruptions++;
     }
     else if (info->type() == CorruptionType::RotateRight)
     {
-      uint8_t rotate = Util::ror<uint8_t>(data[i], info->value());
+      uint8_t rotate = util::ror<uint8_t>(data[i], info->value());
 
       data[i] = rotate;
       corruptions++;
@@ -191,5 +217,8 @@ void NintendoFile::corrupt(std::vector<uint8_t>& data, std::vector<std::string>&
     }
   }
 
-  std::cout << "Replaced a total of " << corruptions << " bytes." << std::endl;
+  //  Use stringstream so that lines won't be mangled from multi-threading
+  std::stringstream ss;
+  ss << "Replaced a total of " << corruptions << " bytes." << std::endl;
+  std::cout << ss.str();
 }

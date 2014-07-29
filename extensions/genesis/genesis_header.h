@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "helpers.h"
+#include "util.h"
 
 namespace GenesisOffset
 {
@@ -56,21 +56,21 @@ private:
 
 inline bool GenesisHeader::valid()
 {
-  return Util::read(header, 0x100, 4) == "SEGA";
+  return util::read(header, 0x100, 4) == "SEGA";
 }
 
 inline uint16_t GenesisHeader::checksum()
 {
-  return Util::read<uint16_t>(header, 0x18E);
+  return util::read<uint16_t>(header, 0x18E);
 }
 
 inline uint32_t GenesisHeader::begin()
 {
-  return Util::read<uint32_t>(header, 0x1A0) + header.size();
+  return util::read<uint32_t>(header, 0x1A0) + header.size();
 }
 
 inline uint32_t GenesisHeader::end()
 {
-  return Util::read<uint32_t>(header, 0x1A4);
+  return util::read<uint32_t>(header, 0x1A4);
 }
 #endif

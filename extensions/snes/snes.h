@@ -51,7 +51,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "helpers.h"
+#include "util.h"
 
 class SNESCorruption : public Corruption
 {

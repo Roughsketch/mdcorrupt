@@ -5,7 +5,7 @@
 #include <vector>
 #include <iterator>
 
-#include "helpers.h"
+#include "util.h"
 
 namespace NDSOffset
 {
@@ -86,7 +86,7 @@ struct NDSHeader
   uint32_t arm7_ram_address();
   uint32_t arm7_size();
 
-  uint32_t file_name_table() { return Util::read<uint32_t>(ref(this->header), NDSOffset::FileTableOffset); }
+  uint32_t file_name_table() { return util::read<uint32_t>(ref(this->header), NDSOffset::FileTableOffset); }
   uint32_t file_name_size();
   uint32_t file_alloc_table();
   uint32_t file_alloc_size();
@@ -158,107 +158,107 @@ inline uint8_t NDSHeader::autostart()
 
 inline uint32_t NDSHeader::arm9_rom_offset()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM9Rom);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM9Rom);
 }
 
 inline uint32_t NDSHeader::arm9_entry_address()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM9Entry);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM9Entry);
 }
 
 inline uint32_t NDSHeader::arm9_ram_address()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM9RAM);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM9RAM);
 }
 
 inline uint32_t NDSHeader::arm9_size()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM9Size);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM9Size);
 }
 
 inline uint32_t NDSHeader::arm7_rom_offset()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM7Rom);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM7Rom);
 }
 
 inline uint32_t NDSHeader::arm7_entry_address()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM7Entry);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM7Entry);
 }
 
 inline uint32_t NDSHeader::arm7_ram_address()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM7RAM);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM7RAM);
 }
 
 inline uint32_t NDSHeader::arm7_size()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM7Size);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM7Size);
 }
 
 inline uint32_t NDSHeader::file_name_size()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::FileTableSize);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::FileTableSize);
 }
 
 inline uint32_t NDSHeader::file_alloc_table()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::FileAllocationOffset);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::FileAllocationOffset);
 }
 
 inline uint32_t NDSHeader::file_alloc_size()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::FileAllocationSize);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::FileAllocationSize);
 }
 
 inline uint32_t NDSHeader::command_port_normal()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::CommandPortNormal);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::CommandPortNormal);
 }
 
 inline uint32_t NDSHeader::command_port_key1()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::CommandPortKey1);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::CommandPortKey1);
 }
 
 inline uint32_t NDSHeader::icon_title_offset()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::IconTitle);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::IconTitle);
 }
 
 inline uint16_t NDSHeader::secure_checksum()
 {
-  return Util::read<uint16_t>(ref(this->header), NDSOffset::SecureChecksum);
+  return util::read<uint16_t>(ref(this->header), NDSOffset::SecureChecksum);
 }
 
 inline uint16_t NDSHeader::secure_loading_timeout()
 {
-  return Util::read<uint16_t>(ref(this->header), NDSOffset::SecureLoadingTimeout);
+  return util::read<uint16_t>(ref(this->header), NDSOffset::SecureLoadingTimeout);
 }
 
 inline uint32_t NDSHeader::arm9_auto_load()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM9AutoLoadRAM);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM9AutoLoadRAM);
 }
 
 inline uint32_t NDSHeader::arm7_auto_load()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::ARM7AutoLoadRAM);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::ARM7AutoLoadRAM);
 }
 
 inline uint64_t NDSHeader::secure_area_disable()
 {
-  return Util::read<uint64_t>(ref(this->header), NDSOffset::SecureAreaDisable);
+  return util::read<uint64_t>(ref(this->header), NDSOffset::SecureAreaDisable);
 }
 
 inline uint32_t NDSHeader::size_used()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::SizeUsed);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::SizeUsed);
 }
 
 inline uint32_t NDSHeader::header_size()
 {
-  return Util::read<uint32_t>(ref(this->header), NDSOffset::HeaderSize);
+  return util::read<uint32_t>(ref(this->header), NDSOffset::HeaderSize);
 }
 
 #endif

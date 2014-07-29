@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <limits>
 
-#include "helpers.h"
+#include "util.h"
 
 class NESCorruptionInfo : public CorruptionInfo
 {

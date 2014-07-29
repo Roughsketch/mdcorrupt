@@ -78,14 +78,14 @@ void DreamcastCorruption::corrupt()
     }
     catch (...)
     {
-      debug::cout << "Could not find file '" << file << "'" << std::endl;
+      //debug::cout << "Could not find file '" << file << "'" << std::endl;
       continue;
     }
 
     //  If no data, then throw an exception
     if (data.empty())
     {
-      debug::cout << "No data found in file '" << file << "'" << std::endl;
+      //debug::cout << "No data found in file '" << file << "'" << std::endl;
       continue;
     }
 
@@ -149,7 +149,7 @@ void DreamcastCorruption::corrupt()
       }
       else if (info->type() == CorruptionType::RotateLeft)
       {
-        uint8_t rotate = Util::rol<uint8_t>(data[i], info->value());
+        uint8_t rotate = util::rol<uint8_t>(data[i], info->value());
 
         if (valid_byte(rotate, i))
         {
@@ -159,7 +159,7 @@ void DreamcastCorruption::corrupt()
       }
       else if (info->type() == CorruptionType::RotateRight)
       {
-        uint8_t rotate = Util::ror<uint8_t>(data[i], info->value());
+        uint8_t rotate = util::ror<uint8_t>(data[i], info->value());
 
         if (valid_byte(rotate, i))
         {

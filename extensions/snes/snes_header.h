@@ -27,9 +27,16 @@ namespace SNESOffset
     Version         = 0x1b,
     Complement      = 0x1c,
     Checksum        = 0x1e,
-    Native_Int      = 0x23,
-    Emulation_Int   = 0x34,
-    Reset           = 0x3c
+    Native_COP      = 0x24,
+    Native_BRK      = 0x26,
+    Native_ABORT    = 0x28,
+    Native_NMI      = 0x2A,
+    Native_IRQ      = 0x2E,
+    Emulated_COP    = 0x34,
+    Emulated_ABORT  = 0x38,
+    Emulated_NMI    = 0x3A,
+    Emulated_RESET  = 0x3C,
+    Emulated_IRQ_BRK= 0x3E
   };
 }
 

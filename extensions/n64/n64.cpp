@@ -57,7 +57,7 @@ bool N64Corruption::valid()
 bool N64Corruption::valid_byte(uint8_t byte, uint32_t location)
 {
   //  Get instruction which is bound to a 4 byte alignment
-  uint32_t instruction = Util::read<uint32_t>(ref(rom), location - (location % 4));
+  uint32_t instruction = util::read<uint32_t>(ref(rom), location - (location % 4));
 
   //  Get first opcode which is between bits 31 and 26 ( 6 bits total )
   uint8_t opcode = (instruction >> 24) & 0xFC;

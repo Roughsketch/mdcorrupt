@@ -79,13 +79,11 @@
 #include <fstream>
 #include <cstdint>
 
-#include "patch.h"
-
 #include "img_entry.h"
 #include "img_except.h"
 #include "img_path.h"
 
-#include "helpers.h"
+#include "util.h"
 
 class IMG
 {

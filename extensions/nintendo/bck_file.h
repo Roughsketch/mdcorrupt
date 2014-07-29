@@ -40,7 +40,7 @@ namespace bck
 
     static inline bool match(std::vector<uint8_t>& data)
     {
-      return Util::read(data, 0, 8) == "J3D1bck1" || Util::read(data, 0, 8) == "J3D1btk1";
+      return util::read(data, 0, 8) == "J3D1bck1" || util::read(data, 0, 8) == "J3D1btk1";
     }
   private:
     std::unique_ptr<CorruptionInfo> info;

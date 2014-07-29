@@ -23,7 +23,7 @@ void Corruption::initialize(std::string filename, std::vector<std::string>& args
   {
     this->info->set_save_file(boost::filesystem::basename(filename));
   }
-  debug::cout << "Outfile: " << info->save_file() << std::endl;
+  //debug::cout << "Outfile: " << info->save_file() << std::endl;
 }
 
 /*
@@ -74,7 +74,7 @@ void Corruption::read(std::string filename)
 */
 void Corruption::save(std::string filename)
 {
-  debug::cout << "Saving file to " << info->save_file() << std::endl;
+  //debug::cout << "Saving file to " << info->save_file() << std::endl;
   rom_file.open(info->save_file(), std::ios::out | std::ios::binary);
   std::copy(rom.begin(), rom.end(), std::ostream_iterator<uint8_t>(rom_file));
   rom_file.close();
@@ -86,9 +86,9 @@ void Corruption::corrupt()
 
   std::uniform_int_distribution<int> dist(0x00, 0xFF);
 
-  for (uint32_t i = info->start();     // Start at header + start value
-    i <= this->rom.size() - info->step() && i < info->end(); // While in a valid range
-    i += info->step())                                     // Increase by step size
+  for (uint32_t i = info->start();            // Start at header + start value
+    i < this->rom.size() && i < info->end();  // While in a valid range
+    i += info->step())                        // Increase by step size
   {
     if (info->type() == CorruptionType::Shift)
     {
@@ -148,7 +148,7 @@ void Corruption::corrupt()
     }
     else if (info->type() == CorruptionType::RotateLeft)
     {
-      uint8_t rotate = Util::rol<uint8_t>(this->rom[i], info->value());
+      uint8_t rotate = util::rol<uint8_t>(this->rom[i], info->value());
 
       if (valid_byte(rotate, i))
       {
@@ -158,7 +158,7 @@ void Corruption::corrupt()
     }
     else if (info->type() == CorruptionType::RotateRight)
     {
-      uint8_t rotate = Util::ror<uint8_t>(this->rom[i], info->value());
+      uint8_t rotate = util::ror<uint8_t>(this->rom[i], info->value());
 
       if (valid_byte(rotate, i))
       {
@@ -203,6 +203,7 @@ void Corruption::corrupt()
       break;  //  No corruption selected, might as well quit.
     }
   }
+
   std::cout << "Replaced a total of " << corruptions << " bytes." << std::endl;
 }
 
@@ -218,7 +219,7 @@ bool Corruption::valid_byte(uint8_t byte, uint32_t location)
 
 void Corruption::print_header()
 {
-  debug::cout << "No header." << std::endl;
+  //debug::cout << "No header." << std::endl;
 }
 
 int Corruption::size()

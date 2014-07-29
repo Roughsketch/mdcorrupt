@@ -6,18 +6,18 @@ namespace u8
   {
     FileEntry::FileEntry(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_type_and_offset = Util::read_big<uint32_t>(data, offset + FileEntry::Offset::Type);
-      m_begin_or_index = Util::read_big<uint32_t>(data, offset + FileEntry::Offset::Begin);
-      m_size_or_index_first = Util::read_big<uint32_t>(data, offset + FileEntry::Offset::Size);
+      m_type_and_offset = util::read_big<uint32_t>(data, offset + FileEntry::Offset::Type);
+      m_begin_or_index = util::read_big<uint32_t>(data, offset + FileEntry::Offset::Begin);
+      m_size_or_index_first = util::read_big<uint32_t>(data, offset + FileEntry::Offset::Size);
     }
 
     FST::FST(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_root = FileEntry(Util::subset(data, offset, FileEntry::EntrySize));
+      m_root = FileEntry(util::subset(data, offset, FileEntry::EntrySize));
 
       for (uint32_t i = 1; i < m_root.data_size(); i++)
       {
-        m_entries.push_back(FileEntry(Util::subset(data, offset + (i * FileEntry::EntrySize), FileEntry::EntrySize)));
+        m_entries.push_back(FileEntry(util::subset(data, offset + (i * FileEntry::EntrySize), FileEntry::EntrySize)));
 
         if (m_entries.back().is_file())
         {
@@ -28,10 +28,10 @@ namespace u8
 
     Header::Header(std::vector<uint8_t>& data, uint32_t offset)
     {
-      m_magic = Util::read_big<uint32_t>(data, offset + Header::Offset::Magic);
-      m_node_offset = Util::read_big<uint32_t>(data, offset + Header::Offset::NodeOffset);
-      m_fst_size = Util::read_big<uint32_t>(data, offset + Header::Offset::FSTSize);
-      m_data_offset = Util::read_big<uint32_t>(data, offset + Header::Offset::DataOffset);
+      m_magic = util::read_big<uint32_t>(data, offset + Header::Offset::Magic);
+      m_node_offset = util::read_big<uint32_t>(data, offset + Header::Offset::NodeOffset);
+      m_fst_size = util::read_big<uint32_t>(data, offset + Header::Offset::FSTSize);
+      m_data_offset = util::read_big<uint32_t>(data, offset + Header::Offset::DataOffset);
     }
   }
 
@@ -41,7 +41,7 @@ namespace u8
     header = std::make_unique<detail::Header>(data);
     fst = std::make_unique<detail::FST>(data, header->node_offset());
 
-    std::cout << "Found " << fst->file_count() << " files." << std::endl;
+    //std::cout << "Found " << fst->file_count() << " files." << std::endl;
   }
 
   std::vector<uint8_t> U8File::corrupt(std::vector<uint8_t>& data, std::vector<std::string>& args)
@@ -52,7 +52,7 @@ namespace u8
 
     for (auto& entry : fst->files())
     {
-      std::vector<uint8_t> filedata = Util::subset(data, entry.data_start(), entry.data_size());
+      std::vector<uint8_t> filedata = util::subset(data, entry.data_start(), entry.data_size());
 
       /*
       std::ofstream ofs(entry.name(), std::ios::binary);
@@ -61,7 +61,7 @@ namespace u8
       */
 
       //  If the file is Yaz0 compressed then ignore it since the sizes most likely won't match
-      if (Util::read(filedata, 0, 4) != "Yaz0")
+      if (util::read(filedata, 0, 4) != "Yaz0")
       {
         //  Since RARC files are archives of Nintendo files, corrupt it with Nintendo file protection
         NintendoFile::start(filedata, args);

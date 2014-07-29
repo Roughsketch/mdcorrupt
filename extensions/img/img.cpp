@@ -80,9 +80,9 @@ IMG::IMG(std::string filename, bool has_headers)
     throw IMGException("Header is not valid.");
   }
 
-  this->block_size = Util::read<uint16_t>(ref(raw), 0x80); //  Read fake block size
-  this->path_table_size = Util::read<uint32_t>(ref(raw), 0x84); //  Read path table size
-  this->path_table_location = Util::read<uint32_t>(ref(raw), 0x8C); //  Read path table location (LSB)
+  this->block_size = util::read<uint16_t>(ref(raw), 0x80); //  Read fake block size
+  this->path_table_size = util::read<uint32_t>(ref(raw), 0x84); //  Read path table size
+  this->path_table_location = util::read<uint32_t>(ref(raw), 0x8C); //  Read path table location (LSB)
 
   //  Clear contents and prepare to read the global path table
   raw.clear();
@@ -140,7 +140,7 @@ Entry IMG::operator[](std::string filename)
   std::shared_ptr<Path> parent = nullptr; //  Path that holds the file requested
 
   //  Get the directories from the filename and the filename itself
-  std::vector<std::string> directories = Util::split(filename, "/", false);
+  std::vector<std::string> directories = util::split(filename, "/", false);
   std::string file = directories.back();
 
   //  Remove last entry which was the file name

@@ -528,7 +528,7 @@ namespace bmd
 
     static inline bool match(std::vector<uint8_t>& data)
     {
-      return Util::read(data, 0, 8) == "J3D2bmt3";
+      return util::read(data, 0, 8) == "J3D2bmt3";
     }
   private:
   };
@@ -540,7 +540,7 @@ namespace bmd
 
     static inline bool match(std::vector<uint8_t>& data)
     {
-      return Util::read(data, 0, 8) == "J3D2bmd3";
+      return util::read(data, 0, 8) == "J3D2bmd3";
     }
   private:
   };

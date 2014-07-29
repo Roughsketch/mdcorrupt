@@ -83,14 +83,14 @@ void PSXCorruption::corrupt()
     }
     catch (...)
     {
-      debug::cout << "Could not find file '" << file << "'" << std::endl;
+      //debug::cout << "Could not find file '" << file << "'" << std::endl;
       continue;
     }
 
     //  If no data, then throw an exception
     if (data.empty())
     {
-      debug::cout << "No data found in file '" << file << "'" << std::endl;
+      //debug::cout << "No data found in file '" << file << "'" << std::endl;
       continue;
     }
 
@@ -154,7 +154,7 @@ void PSXCorruption::corrupt()
       }
       else if (info->type() == CorruptionType::RotateLeft)
       {
-        uint8_t rotate = Util::rol<uint8_t>(data[i], info->value());
+        uint8_t rotate = util::rol<uint8_t>(data[i], info->value());
 
         if (valid_byte(rotate, i))
         {
@@ -164,7 +164,7 @@ void PSXCorruption::corrupt()
       }
       else if (info->type() == CorruptionType::RotateRight)
       {
-        uint8_t rotate = Util::ror<uint8_t>(data[i], info->value());
+        uint8_t rotate = util::ror<uint8_t>(data[i], info->value());
 
         if (valid_byte(rotate, i))
         {
@@ -219,39 +219,6 @@ void PSXCorruption::corrupt()
 
   //  Tell the user how many bytes were corrupted
   std::cout << corruptions << " bytes corrupted." << std::endl;
-
-  /*
-  //  Read the file into wad
-  Entry wad = (*this->rom)["wad.wad"];
-  //  Get the raw data of the entry
-  std::vector<uint8_t> data = wad.get(img);
-
-  //  If no data, then throw an exception
-  if (data.empty())
-  {
-    throw FileNotFoundException("File was not found in the IMG.");
-  }
-
-  for (uint32_t i = 0; i < data.size() - 20; i += info->step())
-  {
-    uint8_t old = data[i];
-    data[i] = dist(this->random);
-
-    if (old != data[i])
-    {
-      corruptions++;
-    }
-  }
-
-  //  Write the modified data back to the file
-  wad.write(img, data);
-
-  //  Close the file
-  img.close();
-
-  //  Tell the user how many bytes were corrupted
-  std::cout << corruptions << " bytes corrupted." << std::endl;
-  */
 }
 
 bool PSXCorruption::valid()

@@ -1,5 +1,5 @@
 #include "yaz0.h"
-#include <iostream>
+#include <algorithm>
 
 namespace yaz0
 {
@@ -15,71 +15,58 @@ namespace yaz0
     }
 
     // simple and straight encoding scheme for Yaz0
-    uint32_t simpleEnc(uint8_t* src, uint32_t size, uint32_t pos, uint32_t *pMatchPos)
+    uint32_t simpleEnc(const std::vector<uint8_t>& src, uint32_t size, uint32_t pos, uint32_t& outPos)
     {
-      uint32_t i, j;
-      int32_t startPos = pos - 0x1000;
       uint32_t numBytes = 1;
       uint32_t matchPos = 0;
+      int startPos = std::max(0, static_cast<int>(pos - 0x1000));
+      int diff = size - pos;
+      int j = 0;
 
-      if (startPos < 0)
+      for (int i = startPos; i < pos; i++)
       {
-        startPos = 0;
-      }
+        j = 0;
 
-      for (i = startPos; i < pos; i++)
-      {
-        for (j = 0; j < size - pos; j++)
+        while (j < diff && src[i + j] == src[j + pos])
         {
-          if (src[i + j] != src[j + pos])
-          {
-            break;
-          }
+          j++;
         }
 
+        //  If this is a bigger sequence then save the values
         if (j > numBytes)
         {
           numBytes = j;
-          matchPos = i;
+          outPos = i;
         }
       }
 
-      *pMatchPos = matchPos;
-
-      if (numBytes == 2)
-      {
-        numBytes = 1;
-      }
-
-      return numBytes;
+      //  If number of bytes is 2 then act like it's only 1
+      return numBytes == 2 ? 1 : numBytes;
     }
 
     // a lookahead encoding scheme for ngc Yaz0
-    uint32_t nintendoEnc(uint8_t* src, uint32_t size, uint32_t pos, uint32_t *pMatchPos)
+    uint32_t Encoder::nintendoEnc(const std::vector<uint8_t>& src, uint32_t size, uint32_t pos, uint32_t& pMatchPos)
     {
       int startPos = pos - 0x1000;
       uint32_t numBytes = 1;
-      static uint32_t numBytes1;
-      static uint32_t matchPos;
-      static int prevFlag = 0;
 
       // if prevFlag is set, it means that the previous position was determined by look-ahead try.
       // so just use it. this is not the best optimization, but nintendo's choice for speed.
       if (prevFlag == 1)
       {
-        *pMatchPos = matchPos;
+        pMatchPos = matchPos;
         prevFlag = 0;
         return numBytes1;
       }
 
       prevFlag = 0;
-      numBytes = simpleEnc(src, size, pos, &matchPos);
-      *pMatchPos = matchPos;
+      numBytes = simpleEnc(src, size, pos, matchPos);
+      pMatchPos = matchPos;
 
       // if this position is RLE encoded, then compare to copying 1 byte and next position(pos+1) encoding
       if (numBytes >= 3) 
       {
-        numBytes1 = simpleEnc(src, size, pos + 1, &matchPos);
+        numBytes1 = simpleEnc(src, size, pos + 1, matchPos);
 
         // if the next position encoding is +2 longer than current position, choose it.
         // this does not guarantee the best optimization, but fairly good optimization with speed.
@@ -132,6 +119,11 @@ namespace yaz0
           uint32_t dist = ((byte1 & 0xF) << 8) | byte2;
           uint32_t copySource = r.dstPos - (dist + 1);
 
+          if (r.dstPos < (dist + 1))
+          {
+            throw;
+          }
+
           uint32_t numBytes = byte1 >> 4;
           if (numBytes == 0)
           {
@@ -144,6 +136,7 @@ namespace yaz0
             numBytes += 2;
 
           //copy run
+
           for (uint32_t i = 0; i < numBytes; ++i)
           {
             dst[r.dstPos] = dst[copySource];
@@ -163,20 +156,17 @@ namespace yaz0
 
   std::vector<uint8_t> encode(std::string filename)
   {
-    return encode(Util::read_file(filename));
+    return encode(util::read_file(filename));
   }
 
   std::vector<uint8_t> decode(std::string filename)
   {
-    return decode(Util::read_file(filename));
+    return decode(util::read_file(filename));
   }
 
   std::vector<uint8_t> encode(std::vector<uint8_t>& src)
   {
     std::vector<uint8_t> ret;
-
-    //FILE* dstFile = nullptr;
-    //fopen_s(&dstFile, "out_file.szs", "wb");
 
     ret.push_back('Y');
     ret.push_back('a');
@@ -201,13 +191,15 @@ namespace yaz0
     uint32_t validBitCount = 0; //number of valid bits left in "code" byte
     uint8_t currCodeByte = 0;
 
+    detail::Encoder state;
+
     while (r.srcPos < src.size())
     {
       uint32_t numBytes;
       uint32_t matchPos;
       uint32_t srcPosBak;
 
-      numBytes = detail::nintendoEnc(&src[0], src.size(), r.srcPos, &matchPos);
+      numBytes = state.nintendoEnc(src, src.size(), r.srcPos, matchPos);
       if (numBytes < 3)
       {
         //straight copy
@@ -255,10 +247,6 @@ namespace yaz0
       //write eight codes
       if (validBitCount == 8)
       {
-        //fwrite(&currCodeByte, 1, 1, dstFile);
-        //fwrite(dst, 1, r.dstPos, dstFile);
-        //fflush(dstFile);
-
         ret.push_back(currCodeByte);
 
         for (uint32_t i = 0; i < r.dstPos; i++)
@@ -281,9 +269,6 @@ namespace yaz0
 
     if (validBitCount > 0)
     {
-      //fwrite(&currCodeByte, 1, 1, dstFile);
-      //fwrite(dst, 1, r.dstPos, dstFile);
-
       ret.push_back(currCodeByte);
 
       for (uint32_t i = 0; i < r.dstPos; i++)
@@ -309,14 +294,8 @@ namespace yaz0
 
     while (readBytes < src.size())
     {
-      /*
-        && (src[readBytes] != 'Y'
-        || src[readBytes + 1] != 'a'
-        || src[readBytes + 2] != 'z'
-        || src[readBytes + 3] != '0'))
-      */
       //search yaz0 block
-      while (readBytes + 3 < src.size() && Util::read(src, readBytes, 4) != "Yaz0")
+      while (readBytes + 3 < src.size() && util::read(src, readBytes, 4) != "Yaz0")
       {
         readBytes++;
       }
@@ -328,46 +307,19 @@ namespace yaz0
 
       readBytes += 4;
 
-      //  char dstName[300];
-      //  sprintf_s(dstName, "%s %x.rarc", filename.c_str(), readBytes - 4);
-      //  FILE* DataFile;
-      //
-      //  if ((DataFile = fopen(dstName, "wb")) == NULL)
-      //  {
-      //    return std::vector<uint8_t>(0);
-      //  }
-      //  printf("Writing %s\n", dstName);
+      uint32_t Size = util::read_big<uint32_t>(src, readBytes);
 
-
-      //  Updated version of above, but not needed.
-      //  std::string dstName = filename + " " + std::to_string(readBytes - 4) + ".rarc";
-      //  std::cout << "Writing " << dstName << std::endl;
-
-      //uint32_t Size = detail::toDWORD(*(uint32_t*)(&src[0] + readBytes));
-      uint32_t Size = Util::read_big<uint32_t>(src, readBytes);
-
-      //printf("Writing 0x%X bytes\n", Size);
-      //std::cout << "Writing 0x" << Size << " bytes" << std::endl;
-
-      //uint8_t* Dst = (uint8_t *)malloc(Size + 0x1000);
-      std::vector<uint8_t> Dst(Size + 0x1000);
+      std::vector<uint8_t> dst(Size + 0x1000);
 
       readBytes += 12; // 4 byte size, 8 byte unused
 
-      detail::Ret r = detail::decodeYaz0(&src[0] + readBytes, src.size() - readBytes, &Dst[0], Size);
+      detail::Ret r = detail::decodeYaz0(&src[0] + readBytes, src.size() - readBytes, &dst[0], Size);
       readBytes += r.srcPos;
-
-      //printf("Read 0x%X bytes from input\n", readBytes);
-      //std::cout << "Read 0x" << readBytes << " bytes from input" << std::endl;
 
       for (uint32_t i = 0; i < r.dstPos; i++)
       {
-        ret.push_back(Dst[i]);
+        ret.push_back(dst[i]);
       }
-      //free(Dst);
-
-      //fwrite(Dst, 1, r.dstPos, DataFile);
-      //fclose(DataFile);
     }
 
     return ret;

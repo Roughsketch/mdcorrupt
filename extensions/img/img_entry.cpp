@@ -7,17 +7,17 @@ Entry::Entry()
 
 Entry::Entry(std::vector<uint8_t>& data, uint32_t r_blocksize, uint32_t l_blocksize)
 {
-  m_size = Util::read<uint8_t>(data, EntryOffset::Size);
-  m_extended_size = Util::read<uint8_t>(data, EntryOffset::Extended);
-  m_location = Util::read<uint32_t>(data, EntryOffset::ExtentLocation);
-  m_data_length = Util::read<uint32_t>(data, EntryOffset::DataLength);
+  m_size = util::read<uint8_t>(data, EntryOffset::Size);
+  m_extended_size = util::read<uint8_t>(data, EntryOffset::Extended);
+  m_location = util::read<uint32_t>(data, EntryOffset::ExtentLocation);
+  m_data_length = util::read<uint32_t>(data, EntryOffset::DataLength);
   //date = std::make_unique<DateTime>(data, EntryOffset::Date);
-  m_flags = Util::read<uint8_t>(data, EntryOffset::FileFlags);
-  m_file_unit_size = Util::read<uint8_t>(data, EntryOffset::FileUnitSize);
-  m_interleave_gap = Util::read<uint8_t>(data, EntryOffset::InterleaveGap);
-  m_volume_sequence_number = Util::read<uint16_t>(data, EntryOffset::VolumeSequenceNumber);
-  m_file_id_length = Util::read<uint8_t>(data, EntryOffset::FileIdentifierLength);
-  m_identifier = Util::read(data, EntryOffset::FileIdentifier, m_file_id_length);
+  m_flags = util::read<uint8_t>(data, EntryOffset::FileFlags);
+  m_file_unit_size = util::read<uint8_t>(data, EntryOffset::FileUnitSize);
+  m_interleave_gap = util::read<uint8_t>(data, EntryOffset::InterleaveGap);
+  m_volume_sequence_number = util::read<uint16_t>(data, EntryOffset::VolumeSequenceNumber);
+  m_file_id_length = util::read<uint8_t>(data, EntryOffset::FileIdentifierLength);
+  m_identifier = util::read(data, EntryOffset::FileIdentifier, m_file_id_length);
 
   if (m_identifier.length() == 1 && m_identifier[0] == 1)
   {
@@ -75,10 +75,10 @@ bool Entry::is_directory(std::vector<uint8_t>& entry)
 bool Entry::is_file(std::vector<uint8_t>& entry)
 {
   //  Read in the file identifier length to know how long the identifier is
-  uint8_t file_id_length = Util::read<uint8_t>(entry, EntryOffset::FileIdentifierLength);
+  uint8_t file_id_length = util::read<uint8_t>(entry, EntryOffset::FileIdentifierLength);
 
   //  Read in the identifier
-  std::string identifier = Util::read(entry, EntryOffset::FileIdentifier, file_id_length);
+  std::string identifier = util::read(entry, EntryOffset::FileIdentifier, file_id_length);
 
   //  Entry is a file if the entry ends with ;1 (at least for most cases)
   return (identifier.length() > 2 && identifier.substr(identifier.length() - 2) == ";1");

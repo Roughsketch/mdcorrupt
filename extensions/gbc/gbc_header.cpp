@@ -18,7 +18,7 @@ void GBCHeader::initialize(std::vector<uint8_t>& rom)
 
 uint16_t GBCHeader::entry()
 {
-  return Util::read<uint16_t>(ref(header), GBCLocal::Entry);
+  return util::read<uint16_t>(ref(header), GBCLocal::Entry);
 }
 
 bool GBCHeader::valid_logo()
@@ -59,7 +59,7 @@ uint32_t GBCHeader::manufacturer()
   //  Manufacturer is only set when the CGB flag is active
   if (this->cgb() & 0x80)
   {
-    return Util::read<uint32_t>(ref(header), GBCLocal::Manufacturer);
+    return util::read<uint32_t>(ref(header), GBCLocal::Manufacturer);
   }
 
   //  No CGB flag, no manufacturer
@@ -73,7 +73,7 @@ uint8_t GBCHeader::cgb()
 
 uint16_t GBCHeader::company()
 {
-  return Util::read<uint16_t>(ref(header), GBCLocal::Company);
+  return util::read<uint16_t>(ref(header), GBCLocal::Company);
 }
 
 uint8_t GBCHeader::sgb()

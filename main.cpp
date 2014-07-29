@@ -34,12 +34,12 @@
 #include <memory>
 #include <string>
 #include <regex>
+#include <future>
+#include <thread>
 
 #include "corrupt.h"
 
 #include "log.h"
-
-#include "nintendo/yaz0.h"
 /*
   Takes a class type derived from Corruption and forms a template to execute the corruption
 
@@ -53,7 +53,7 @@ template<typename T> void corrupt(std::string filename, std::vector<std::string>
   static_assert(std::is_base_of<Corruption, T>::value, "function only takes a derived class of Corruption.");
   //static_assert(std::is_default_constructible<T>::value, "class must have default constructor.");
 
-  debug::cout << "Initializing." << std::endl;
+  //debug::cout << "Initializing." << std::endl;
   std::unique_ptr<T> rom = std::make_unique<T>(filename, args);
 
 	try
@@ -65,7 +65,7 @@ template<typename T> void corrupt(std::string filename, std::vector<std::string>
     //debug::cout << "Printing." << std::endl;
     //rom->print_header();
 
-    debug::cout << "Corrupting." << std::endl;
+    //debug::cout << "Corrupting." << std::endl;
     rom->corrupt();
 
     rom->save("output");
@@ -165,40 +165,38 @@ void parse(std::vector<std::string> args)
   std::string file(args[0]);
   std::string extension = boost::filesystem::extension(file);
 
+  //std::cout << "File: " << file << std::endl;
+  //std::cout << "Ext : " << extension << std::endl;
+
   args.erase(args.begin()); //  Remove the index that holds the filename
 
+  //  --nintendo handles GameCube and Wii files. Eventually it will also handle NDS.
   if (std::find(args.begin(), args.end(), "--nintendo") != args.end())
   {
-    debug::cout << "Nintendo" << std::endl;
+    //debug::cout << "Nintendo" << std::endl;
     args.erase(std::remove(args.begin(), args.end(), "--nintendo"), args.end());
 
     NintendoFile::start(file, args);
   }
-  else if (std::find(args.begin(), args.end(), "--gamecube") != args.end())
-  {
-    debug::cout << "GameCube" << std::endl;
-    args.erase(std::remove(args.begin(), args.end(), "--gamecube"), args.end());
-    corrupt<GamecubeCorruption>(file, args);
-  }
   else if (std::find(args.begin(), args.end(), "--playstation") != args.end())
   {
-    debug::cout << "Playstation" << std::endl;
+    //debug::cout << "Playstation" << std::endl;
     args.erase(std::remove(args.begin(), args.end(), "--playstation"), args.end());
     corrupt<PSXCorruption>(file, args);
   }
   else if (extension == ".nes")
   {
-    debug::cout << "NES" << std::endl;
+    //debug::cout << "NES" << std::endl;
     corrupt<NESCorruption>(file, args);
   }
   else if (extension == ".smc" || extension == ".sfc")
   {
-    debug::cout << "SNES" << std::endl;
+    //debug::cout << "SNES" << std::endl;
     corrupt<SNESCorruption>(file, args);
   }
   else if (extension == ".z64")
   {
-    debug::cout << "N64" << std::endl;
+    //debug::cout << "N64" << std::endl;
     corrupt<N64Corruption>(file, args);
   }
   //else if (extension == ".n64")
@@ -207,37 +205,32 @@ void parse(std::vector<std::string> args)
   //}
   else if (extension == ".gbc" || extension == ".gb")
   {
-    debug::cout << "Game Boy" << std::endl;
+    //debug::cout << "Game Boy" << std::endl;
     corrupt<GBCCorruption>(file, args);
   }
   else if (extension == ".gba")
   {
-    debug::cout << "Game Boy Advance" << std::endl;
+    //debug::cout << "Game Boy Advance" << std::endl;
     corrupt<GBACorruption>(file, args);
   }
   else if (extension == ".nds")
   {
-    debug::cout << "Nintendo DS" << std::endl;
+    //debug::cout << "Nintendo DS" << std::endl;
     corrupt<NDSCorruption>(file, args);
-  }
-  else if (extension == ".gcm")
-  {
-    debug::cout << "GameCube" << std::endl;
-    corrupt<GamecubeCorruption>(file, args);
   }
   else if (extension == ".img" || (extension == ".bin" && boost::filesystem::file_size(file) > (16 * 0x100000)))
   {
-    debug::cout << "Playstation" << std::endl;
+    //debug::cout << "Playstation" << std::endl;
     corrupt<PSXCorruption>(file, args);
   }
   else if (extension == ".bin" || extension == ".md" || extension == ".smd")
   {
-    debug::cout << "Sega Mega Drive / Sega Genesis" << std::endl;
+    //debug::cout << "Sega Mega Drive / Sega Genesis" << std::endl;
     corrupt<GenesisCorruption>(file, args);
   }
   else if (extension == ".cdi")
   {
-    debug::cout << "Normal" << std::endl;
+    //debug::cout << "Normal" << std::endl;
     corrupt<DreamcastCorruption>(file, args);
   }
   else
@@ -246,9 +239,18 @@ void parse(std::vector<std::string> args)
   }
 }
 
+void batch_thread(std::vector<std::string>& lines)
+{
+  std::cout << lines.size() << std::endl;
+  for (auto& line : lines)
+  {
+    parse(split_args(line));
+  }
+}
+
 int main(int argc, char *argv[])
 {
-  std::cout << "Corrupter v0.8" << std::endl;
+  std::cout << "Corrupter v0.8.1" << std::endl;
 
   if (argc == 1 || argc >= 2 && strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
   {
@@ -262,7 +264,7 @@ int main(int argc, char *argv[])
 
   for (int i = 1; i < argc; i++)
   {
-    debug::cout << "Found arg: " << argv[i] << std::endl;
+    //debug::cout << "Found arg: " << argv[i] << std::endl;
     args.push_back(argv[i]);
   }
 
@@ -270,18 +272,43 @@ int main(int argc, char *argv[])
   if (std::find(args.begin(), args.end(), "--debug") != args.end())
   {
     args.erase(std::remove(args.begin(), args.end(), "--debug"), args.end());
-    debug::cout.enable();
-    debug::cerr.enable();
+    //debug::cout.enable();
+    //debug::cerr.enable();
   }
   else
   {
-    debug::cout.disable();
-    debug::cerr.disable();
+    //debug::cout.disable();
+    //debug::cerr.disable();
   }
 
-  debug::cout << "file:   " << file << std::endl;
-  debug::cout << "Extension: " << extension << std::endl;
-  debug::cout << "Type: ";
+  //debug::cout << "File:   " << file << std::endl;
+  //debug::cout << "Extension: " << extension << std::endl;
+  //debug::cout << "Type: ";
+
+
+  if (std::find(args.begin(), args.end(), "--yay0") != args.end())
+  {
+    args.erase(std::remove(args.begin(), args.end(), "--yay0"), args.end());
+    auto data = yay0::decode(util::read_file(file));
+    util::write_file(file + ".yay0", data);
+    exit(0);
+  }
+
+  bool use_future = true;
+  bool use_threads = false;
+
+  if (std::find(args.begin(), args.end(), "--single-threaded") != args.end())
+  {
+    args.erase(std::remove(args.begin(), args.end(), "--single-threaded"), args.end());
+    use_future = false;
+  }
+
+  if (std::find(args.begin(), args.end(), "--std-threaded") != args.end())
+  {
+    args.erase(std::remove(args.begin(), args.end(), "--std-threaded"), args.end());
+    use_future = false;
+    use_threads = true;
+  }
 
   //  If this is a batch execution then run each portion individually.
   if (std::find(args.begin(), args.end(), "--batch") != args.end())
@@ -296,11 +323,70 @@ int main(int argc, char *argv[])
       batchargs.push_back(templine);
     }
 
-    //  Pass each line of the batch file into the parser
-    for (auto& line : batchargs)
+    ifs.close();
+    
+    std::vector<std::thread> threads;
+
+    std::vector<std::future<void>> futures;
+
+    uint32_t max_threads = std::thread::hardware_concurrency();
+
+    if (max_threads == 0)
     {
-      parse(split_args(line));
+      max_threads = 4;
     }
+
+    std::cout << "Maximum concurrent threads: " << max_threads << std::endl;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    //  Pass each line of the batch file into the parser
+
+    if (use_future)
+    {
+      for (uint32_t i = 0; i < batchargs.size();)
+      {
+        while (futures.size() < max_threads)
+        {
+          futures.emplace_back(std::async(std::launch::async, parse, split_args(batchargs[i++])));
+        }
+
+        futures.erase(std::remove_if(futures.begin(), futures.end(),
+          [](std::future<void>& f)
+          {
+            return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready;
+          }
+        ), futures.end());
+      }
+    }
+    else if (use_threads)
+    {
+      for (uint32_t i = 0; i < batchargs.size();)
+      {
+        while (threads.size() < max_threads)
+        {
+          threads.push_back(std::thread(parse, split_args(batchargs[i++])));
+        }
+
+        for (auto& thread : threads)
+        {
+          thread.join();
+        }
+
+        threads.clear();
+      }
+    }
+    else
+    {
+      for (auto& line : batchargs)
+      {
+        parse(split_args(line));
+      }
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::cout << "Time: " << elapsed.count() << std::endl;
   }
   else
   {

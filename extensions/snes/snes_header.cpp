@@ -139,7 +139,7 @@ uint32_t SNESHeader::score_header(std::vector<uint8_t> &rom, uint32_t address)
   int32_t score = 0;
 
   //  Get reset location value
-  uint16_t reset = SNESHeader::create_uint16(rom, address + SNESOffset::Reset);
+  uint16_t reset = SNESHeader::create_uint16(rom, address + SNESOffset::Emulated_RESET);
 
   //  Get the checksum and its complement.
   uint16_t checksum = SNESHeader::create_uint16(rom, address + SNESOffset::Checksum);

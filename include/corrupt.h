@@ -19,8 +19,6 @@
 #include <algorithm>
 #include <memory>
 
-#include "patch.h"
-
 #include "log.h"
 
 class Corruption
@@ -65,9 +63,7 @@ protected:
 #include "psx/psx.h"
 #include "nds/nds.h"
 #include "gba/gba.h"
-#include "gc/gamecube.h"
 #include "genesis/genesis.h"
 #include "dc/dreamcast.h"
-
 #include "nintendo/nintendo.h"
 #endif
