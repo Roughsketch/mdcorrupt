@@ -5,25 +5,15 @@ namespace yaz0
 {
   namespace detail
   {
-    uint32_t toDWORD(uint32_t d)
-    {
-      uint8_t w1 = d & 0xFF;
-      uint8_t w2 = (d >> 8) & 0xFF;
-      uint8_t w3 = (d >> 16) & 0xFF;
-      uint8_t w4 = d >> 24;
-      return (w1 << 24) | (w2 << 16) | (w3 << 8) | w4;
-    }
-
     // simple and straight encoding scheme for Yaz0
     uint32_t simpleEnc(const std::vector<uint8_t>& src, uint32_t size, uint32_t pos, uint32_t& outPos)
     {
-      uint32_t numBytes = 1;
-      uint32_t matchPos = 0;
+      int numBytes = 1;
       int startPos = std::max(0, static_cast<int>(pos - 0x1000));
       int diff = size - pos;
       int j = 0;
 
-      for (int i = startPos; i < pos; i++)
+      for (uint32_t i = startPos; i < pos; i++)
       {
         j = 0;
 

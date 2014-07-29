@@ -82,7 +82,7 @@ namespace rarc
     header = std::make_unique<detail::Header>(data);
 
     //  Push back all nodes
-    for (int i = 0; i < header->node_count(); i++)
+    for (uint32_t i = 0; i < header->node_count(); i++)
     {
       nodes.push_back(detail::Node(data, header, 0x40 + (i * 0x10)));
     }

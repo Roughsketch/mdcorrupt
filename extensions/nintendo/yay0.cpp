@@ -56,10 +56,12 @@ namespace yay0
           //  return r;
         }
         else
+        {
           numBytes += 2;
+        }
 
         //copy run
-        for (int i = 0; i < numBytes; ++i)
+        for (uint32_t i = 0; i < numBytes; ++i)
         {
           dst[r.dstPos] = dst[copySource];
           copySource++;
