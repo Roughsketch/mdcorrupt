@@ -18,11 +18,11 @@ NESCorruption::~NESCorruption()
 void NESCorruption::initialize(std::string filename, std::vector<std::string>& args)
 {
   // Read the rom file
-  this->read(filename);
-  this->info = std::make_unique<NESCorruptionInfo>(args);
+  rom = util::read_file(filename);
+  info = std::make_unique<NESCorruptionInfo>(args);
 
   // If the rom is not valid then throw an exception
-  if (!this->valid())
+  if (!valid())
   {
     throw InvalidNESRomException();
   }
@@ -30,19 +30,19 @@ void NESCorruption::initialize(std::string filename, std::vector<std::string>& a
   // Rom is valid, set up variables.
 
   // Amount of PRG-ROM banks
-  this->prg_rom = this->rom[4];
+  prg_rom = rom[4];
 
   // Amount of CHR-ROM banks
-  this->chr_rom = this->rom[5];
+  chr_rom = rom[5];
 
   // Determine whether this rom utilizes CHR-ROM
-  this->chr = this->rom[5] != 0;
+  chr = rom[5] != 0;
 
   // Header is always 16 bytes and PRG-ROM is directly after the header.
-  this->prg_start = 0x10;
+  prg_start = 0x10;
 
   // CHR-ROM is directly after PRG-ROM and each PRG-ROM bank is 0x4000 bytes long.
-  this->chr_start = this->prg_rom * 0x4000 + this->prg_start;
+  chr_start = prg_rom * 0x4000 + prg_start;
 }
 
 void NESCorruption::corrupt()
@@ -51,19 +51,17 @@ void NESCorruption::corrupt()
 
   if (info->prg())
   {
-    this->corrupt_prg();
+    corrupt_prg();
   }
   
   if (info->chr())
   {
-    this->corrupt_chr();
+    corrupt_chr();
   }
 }
 
 void NESCorruption::corrupt_prg()
 {
-  //debug::cout << "PRG Type: " << info->prg_type() << std::endl;
-
   uint32_t corruptions = 0;
   std::uniform_int_distribution<int> dist(0x00, 0xFF);
 
@@ -204,7 +202,7 @@ void NESCorruption::corrupt_chr()
   //  Corruptions in CHR-ROM will be in blocks of 8 bytes instead of single values.
   //  There are no checks for valid bytes in CHR-ROM.
   for (uint32_t i = this->chr_start + info->chr_start();
-       i < rom.size() - info->chr_step() && i < this->chr_start + chr_end;
+       i < rom.size() && i < this->chr_start + chr_end;
        i += info->chr_step())
   {
     if (info->chr_type() == CorruptionType::Shift)
@@ -415,7 +413,7 @@ void NESCorruption::save(std::string filename)
   std::string format = ".nes";
 
   //  If the filename doesn't include the format extension then add it.
-  if (filename.length() <= format.length() || filename.compare(filename.length() - format.length(), format.length(), format) != 0)
+  if (boost::filesystem::extension(filename) != format)
   {
     filename += format;
   }
@@ -424,18 +422,14 @@ void NESCorruption::save(std::string filename)
   {
     if (info->save_file() != "")
     {
-      //debug::cout << "Saving to " << info->save_file() << std::endl;
-      this->rom_file.open(info->save_file(), std::ios::out | std::ios::binary);
+      util::write_file(info->save_file(), rom);
       this->save_name = info->save_file();
     }
     else
     {
-      this->rom_file.open(filename, std::ios::out | std::ios::binary);
+      util::write_file(filename, rom);
       this->save_name = filename;
     }
-
-    std::copy(rom.begin(), rom.end(), std::ostream_iterator<uint8_t>(this->rom_file));
-    this->rom_file.close();
   }
   catch (InvalidFileNameException e)
   {

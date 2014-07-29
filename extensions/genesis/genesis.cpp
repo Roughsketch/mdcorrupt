@@ -18,26 +18,24 @@ GenesisCorruption::~GenesisCorruption()
 void GenesisCorruption::initialize(std::string filename, std::vector<std::string>& args)
 {
   // Read the rom file
-  this->read(filename);
-  this->info = std::make_unique<CorruptionInfo>(args);
-  this->header = std::make_unique<GenesisHeader>(ref(this->rom));
+  rom = util::read_file(filename);
+  info = std::make_unique<CorruptionInfo>(args);
+  header = std::make_unique<GenesisHeader>(rom);
 
   // If the rom is not valid then throw an exception
-  if (!this->valid())
+  if (!valid())
   {
     throw InvalidGenesisRomException();
   }
-
-  // Rom is valid, set up variables.
 }
 
 /*
-Determines whether or not a given byte is valid to include into the rom.
+  Determines whether or not a given byte is valid to include into the rom.
 
-@param byte - The byte that needs to be checked
-@param location - The offset that the byte will be placed at in the rom
+  @param byte - The byte that needs to be checked
+  @param location - The offset that the byte will be placed at in the rom
 
-@return true if the byte can be added at @location in the rom.
+  @return true if the byte can be added at @location in the rom.
 */
 bool GenesisCorruption::valid_byte(uint8_t byte, uint32_t location)
 {
@@ -95,7 +93,7 @@ void GenesisCorruption::save(std::string filename)
   std::string format = ".md";
 
   //  If the filename doesn't include the format extension then add it.
-  if (filename.length() <= 4 || filename.compare(filename.length() - format.length(), format.length(), format) != 0)
+  if (boost::filesystem::extension(filename) != format)
   {
     filename += format;
   }
@@ -137,17 +135,14 @@ void GenesisCorruption::save(std::string filename)
   {
     if (info->save_file() != "")
     {
-      this->rom_file.open(info->save_file(), std::ios::out | std::ios::binary);
+      util::write_file(info->save_file(), rom);
+      this->save_name = info->save_file();
     }
     else
     {
-      this->rom_file.open(filename, std::ios::out | std::ios::binary);
+      util::write_file(filename, rom);
+      this->save_name = filename;
     }
-
-    std::copy(rom.begin(), rom.end(), std::ostream_iterator<uint8_t>(this->rom_file));
-    this->rom_file.close();
-
-    this->save_name = filename;
   }
   catch (InvalidFileNameException e)
   {

@@ -17,9 +17,9 @@ GBACorruption::~GBACorruption()
 
 void GBACorruption::initialize(std::string filename, std::vector<std::string>& args)
 {
-  this->read(filename);
-  this->header = std::make_unique<GBAHeader>(ref(this->rom));
-  this->info = std::make_unique<CorruptionInfo>(args);
+  rom = util::read_file(filename);
+  header = std::make_unique<GBAHeader>(rom);
+  info = std::make_unique<CorruptionInfo>(args);
 
   if (!valid())
   {
@@ -97,7 +97,7 @@ void GBACorruption::save(std::string filename)
   std::string format = ".gba";
 
   //  If the filename doesn't include the format extension then add it.
-  if (filename.length() <= 4 || filename.compare(filename.length() - format.length(), format.length(), format) != 0)
+  if (boost::filesystem::extension(filename) != format)
   {
     filename += format;
   }
@@ -106,18 +106,14 @@ void GBACorruption::save(std::string filename)
   {
     if (info->save_file() != "")
     {
-      this->rom_file.open(info->save_file(), std::ios::out | std::ios::binary);
+      util::write_file(info->save_file(), rom);
+      this->save_name = info->save_file();
     }
     else
     {
-      this->rom_file.open(filename, std::ios::out | std::ios::binary);
+      util::write_file(filename, rom);
+      this->save_name = filename;
     }
-
-    rom_file.write(reinterpret_cast<char *>(&rom[0]), rom.size());
-    //std::copy(rom.begin(), rom.end(), std::ostream_iterator<uint8_t>(this->rom_file));
-    this->rom_file.close();
-
-    this->save_name = filename;
   }
   catch (InvalidFileNameException e)
   {

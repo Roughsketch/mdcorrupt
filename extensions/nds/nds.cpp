@@ -17,12 +17,12 @@ NDSCorruption::~NDSCorruption()
 
 void NDSCorruption::initialize(std::string filename, std::vector<std::string>& args)
 {
-  this->read(filename);
-  this->header = std::make_unique<NDSHeader>(ref(this->rom));
-  this->info = std::make_unique<CorruptionInfo>(args);
-  this->filesystem = std::make_unique<NDSFileSystem>(ref(this->rom), ref(this->header));
+  rom = util::read_file(filename);
+  header = std::make_unique<NDSHeader>(rom);
+  info = std::make_unique<CorruptionInfo>(args);
+  filesystem = std::make_unique<NDSFileSystem>(rom, header);
 
-  this->m_save = false;
+  m_save = false;
 
   if (info->list())
   {
@@ -49,8 +49,6 @@ void NDSCorruption::corrupt()
 
   for (auto& file : info->files())
   {
-    std::cout << "Reading file" << std::endl;
-
     //  Read the file into wad
     NDSEntry entry;
     
@@ -64,12 +62,7 @@ void NDSCorruption::corrupt()
       continue;
     }
 
-    std::cout << "Corrupting " << file << " with size " << entry.size() << std::endl;
-
-
-    std::cout << "Starting" << std::endl;
-
-    for (uint32_t i = info->start() + entry.offset(); i + info->step() < entry.offset() + entry.size() && i - entry.offset() < info->end(); i += info->step())
+    for (uint32_t i = info->start() + entry.offset(); i < entry.offset() + entry.size() && i - entry.offset() < info->end(); i += info->step())
     {
       if (info->type() == CorruptionType::Shift)
       {
@@ -271,7 +264,7 @@ void NDSCorruption::save(std::string filename)
   std::string format = ".nds";
 
   //  If the filename doesn't include the format extension then add it.
-  if (filename.length() <= 4 || filename.compare(filename.length() - format.length(), format.length(), format) != 0)
+  if (boost::filesystem::extension(filename) != format)
   {
     filename += format;
   }
@@ -280,18 +273,14 @@ void NDSCorruption::save(std::string filename)
   {
     if (info->save_file() != "")
     {
-      this->rom_file.open(info->save_file(), std::ios::out | std::ios::binary);
+      util::write_file(info->save_file(), rom);
+      this->save_name = info->save_file();
     }
     else
     {
-      this->rom_file.open(filename, std::ios::out | std::ios::binary);
+      util::write_file(filename, rom);
+      this->save_name = filename;
     }
-
-    rom_file.write(reinterpret_cast<char *>(&rom[0]), rom.size());
-    //std::copy(rom.begin(), rom.end(), std::ostream_iterator<uint8_t>(this->rom_file));
-    this->rom_file.close();
-
-    this->save_name = filename;
   }
   catch (InvalidFileNameException e)
   {

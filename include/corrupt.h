@@ -51,8 +51,6 @@ protected:
   std::mt19937 random;
 
   std::unique_ptr<CorruptionInfo> info;
-
-  void read(std::string filename);
 };
 
 // Add new Corruption class headers here

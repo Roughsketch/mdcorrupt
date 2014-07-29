@@ -16,55 +16,13 @@ Corruption::~Corruption()
 
 void Corruption::initialize(std::string filename, std::vector<std::string>& args)
 {
-  this->read(filename);
+  rom = util::read_file(filename);
   this->info = std::make_unique<CorruptionInfo>(args);
 
   if (info->save_file() == "")
   {
     this->info->set_save_file(boost::filesystem::basename(filename));
   }
-  //debug::cout << "Outfile: " << info->save_file() << std::endl;
-}
-
-/*
-  Populates the rom variable with the binary contents of
-  the file passed.
-
-  @param filename - The file to read into the rom
-*/
-void Corruption::read(std::string filename)
-{
-  rom_file.open(filename, std::ios::in | std::ios::binary);
-
-  if (rom_file.good())
-  {
-    //  Get the file size so we can properly reserve space for the vector
-    uint64_t rom_size = boost::filesystem::file_size(filename);
-
-    /*
-      When reading binary data into a vector it seems that it purposefully
-      ignores whitespace as if it weren't in binary mode. Because of this
-      we need to unset the skipws flag before reading in data.
-    */
-    rom_file.unsetf(std::ios::skipws);
-
-    if (rom_size < std::numeric_limits<uint32_t>::max())
-    {
-      rom.resize(static_cast<uint32_t>(rom_size));
-    }
-    else
-    {
-      throw InvalidArgumentException(filename + " is over the max 32-bit file size which is not implemented yet.");
-    }
-
-    rom_file.read(reinterpret_cast<char *>(&rom[0]), rom_size);
-
-    //std::copy(std::istream_iterator<uint8_t>(rom_file),
-    //  std::istream_iterator<uint8_t>(),
-    //  std::back_inserter(rom));
-  }
-
-  rom_file.close();
 }
 
 /*
@@ -74,10 +32,24 @@ void Corruption::read(std::string filename)
 */
 void Corruption::save(std::string filename)
 {
-  //debug::cout << "Saving file to " << info->save_file() << std::endl;
-  rom_file.open(info->save_file(), std::ios::out | std::ios::binary);
-  std::copy(rom.begin(), rom.end(), std::ostream_iterator<uint8_t>(rom_file));
-  rom_file.close();
+  try
+  {
+    if (info->save_file() != "")
+    {
+      util::write_file(info->save_file(), rom);
+      this->save_name = info->save_file();
+    }
+    else
+    {
+      util::write_file(filename, rom);
+      this->save_name = filename;
+    }
+  }
+  catch (InvalidFileNameException e)
+  {
+    std::cout << e.what() << std::endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 void Corruption::corrupt()
