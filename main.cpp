@@ -345,7 +345,7 @@ int main(int argc, char *argv[])
     {
       for (uint32_t i = 0; i < batchargs.size();)
       {
-        while (futures.size() < max_threads)
+        while (futures.size() < max_threads && i < batchargs.size())
         {
           futures.emplace_back(std::async(std::launch::async, parse, split_args(batchargs[i++])));
         }
@@ -356,6 +356,11 @@ int main(int argc, char *argv[])
             return f.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready;
           }
         ), futures.end());
+      }
+
+      for (auto& future : futures)
+      {
+        future.get();
       }
     }
     else if (use_threads)
