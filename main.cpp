@@ -38,8 +38,12 @@
 #include <thread>
 
 #include "corrupt.h"
-
 #include "log.h"
+
+
+#define MINIZ_HEADER_FILE_ONLY
+#include "miniz.c"
+
 /*
   Takes a class type derived from Corruption and forms a template to execute the corruption
 
@@ -162,16 +166,78 @@ std::vector<std::string> split_args(std::string args)
 
 void parse(std::vector<std::string> args)
 {
+  static std::vector<std::string> accepted_extentions = {
+    ".nes", ".smc", ".sfc", ".z64", ".gb", ".gbc", ".gba", ".nds", ".img", ".bin", ".md", ".smd", ".cdi"
+  };
+
   std::string file(args[0]);
   std::string extension = boost::filesystem::extension(file);
 
-  //std::cout << "File: " << file << std::endl;
-  //std::cout << "Ext : " << extension << std::endl;
+  std::cout << "File: " << file << std::endl;
+  std::cout << "Ext : " << extension << std::endl;
 
   args.erase(args.begin()); //  Remove the index that holds the filename
 
+  if (extension == ".zip")
+  {
+    std::vector<uint8_t> filedata;
+    mz_zip_archive zip_archive;
+    size_t uncomp_size;
+
+    // Now try to open the archive.
+    memset(&zip_archive, 0, sizeof(zip_archive));
+
+    mz_bool status = mz_zip_reader_init_file(&zip_archive, file.c_str(), 0);
+    if (!status)
+    {
+      std::cout << "mz_zip_reader_init_file() failed!" << std::endl;
+      return;
+    }
+
+    // Get and print information about each file in the archive.
+    for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip_archive); i++)
+    {
+      mz_zip_archive_file_stat file_stat;
+      if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat))
+      {
+        std::cout << "mz_zip_reader_file_stat() failed!" << std::endl;
+        mz_zip_reader_end(&zip_archive);
+        return;
+      }
+
+      std::cout << "Filename: \"" << file_stat.m_filename << "\"" << std::endl;
+
+      std::string ext = boost::filesystem::extension(file_stat.m_filename);
+
+      if (std::find(accepted_extentions.begin(), accepted_extentions.end(), ext) != accepted_extentions.end())
+      {
+        filedata.resize(file_stat.m_uncomp_size);
+
+        uint8_t *tmp = reinterpret_cast<uint8_t *>(mz_zip_reader_extract_file_to_heap(&zip_archive, file_stat.m_filename, &uncomp_size, 0));
+
+        for (int i = 0; i < file_stat.m_uncomp_size; i++)
+        {
+          filedata[i] = static_cast<uint8_t>(tmp[i]);
+        }
+
+        util::write_file(file_stat.m_filename, filedata);
+
+        std::vector<std::string> newargs(args);
+        newargs.insert(newargs.begin(), file_stat.m_filename);
+        parse(newargs);
+
+        std::remove(file_stat.m_filename);
+      }
+      else
+      {
+        std::cout << "Extension " << ext << " not found." << std::endl;
+      }
+    }
+
+    mz_zip_reader_end(&zip_archive);
+  }
   //  --nintendo handles GameCube and Wii files. Eventually it will also handle NDS.
-  if (std::find(args.begin(), args.end(), "--nintendo") != args.end())
+  else if (std::find(args.begin(), args.end(), "--nintendo") != args.end())
   {
     //debug::cout << "Nintendo" << std::endl;
     args.erase(std::remove(args.begin(), args.end(), "--nintendo"), args.end());
@@ -191,7 +257,7 @@ void parse(std::vector<std::string> args)
   }
   else if (extension == ".smc" || extension == ".sfc")
   {
-    //debug::cout << "SNES" << std::endl;
+    std::cout << "SNES" << std::endl;
     corrupt<SNESCorruption>(file, args);
   }
   else if (extension == ".z64")
