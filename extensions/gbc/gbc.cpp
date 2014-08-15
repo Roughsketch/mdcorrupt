@@ -51,6 +51,12 @@ bool GBCCorruption::valid()
 
 bool GBCCorruption::valid_byte(uint8_t byte, uint32_t location)
 {
+  //  If location is in the header then do nothing
+  if (location < GBCHeader::Start)
+  {
+    return false;
+  }
+
   //  Map of branch opcodes and their size
   //  std::map<opcode, size>
   static std::map<uint8_t, uint8_t> invalid_branch{
@@ -70,6 +76,12 @@ bool GBCCorruption::valid_byte(uint8_t byte, uint32_t location)
     0xC0, 0xD0, 0xC7, 0xD7, 0xE7, 0xF7, 0xC8,
     0xD8, 0xC9, 0xD9, 0xCF, 0xDF, 0xEF, 0xFF
   };
+
+  //  If you are within the header size then don't corrupt
+  if (location < GBAHeader::Size)
+  {
+    return false;
+  }
 
   if (std::find(invalid_ret.begin(), invalid_ret.end(), this->rom[location]) != invalid_ret.end() ||
       std::find(invalid_ret.begin(), invalid_ret.end(), byte) != invalid_ret.end())

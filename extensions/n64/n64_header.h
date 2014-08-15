@@ -29,6 +29,8 @@ namespace N64Offset
 class N64Header
 {
 public:
+  static const uint32_t Size = 0x1000;
+
   N64Header();
   N64Header(std::vector<uint8_t>& rom);
 

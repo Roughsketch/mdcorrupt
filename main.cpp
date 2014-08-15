@@ -173,8 +173,8 @@ void parse(std::vector<std::string> args)
   std::string file(args[0]);
   std::string extension = boost::filesystem::extension(file);
 
-  std::cout << "File: " << file << std::endl;
-  std::cout << "Ext : " << extension << std::endl;
+  //std::cout << "File: " << file << std::endl;
+  //std::cout << "Ext : " << extension << std::endl;
 
   args.erase(args.begin()); //  Remove the index that holds the filename
 
@@ -205,7 +205,7 @@ void parse(std::vector<std::string> args)
         return;
       }
 
-      std::cout << "Filename: \"" << file_stat.m_filename << "\"" << std::endl;
+      //std::cout << "Filename: \"" << file_stat.m_filename << "\"" << std::endl;
 
       std::string ext = boost::filesystem::extension(file_stat.m_filename);
 
@@ -230,7 +230,7 @@ void parse(std::vector<std::string> args)
       }
       else
       {
-        std::cout << "Extension " << ext << " not found." << std::endl;
+        std::cout << "Extension " << ext << " not found. Skipping." << std::endl;
       }
     }
 

@@ -39,10 +39,16 @@ void GenesisCorruption::initialize(std::string filename, std::vector<std::string
 */
 bool GenesisCorruption::valid_byte(uint8_t byte, uint32_t location)
 {
-  if (is_branch(util::read_big<uint16_t>(rom, location)) ||
-    is_branch(util::read_big<uint16_t>(rom, location - 1)))
+  //  If location is in the header then do nothing
+  if (location < header->begin())
   {
-    return true;
+    return false;
+  }
+
+  if (is_branch(util::read_big<uint16_t>(rom, location)) ||
+      is_branch(util::read_big<uint16_t>(rom, location - 1)))
+  {
+    return false;
   }
 
   return true;

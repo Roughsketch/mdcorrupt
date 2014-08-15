@@ -56,6 +56,12 @@ bool N64Corruption::valid()
 
 bool N64Corruption::valid_byte(uint8_t byte, uint32_t location)
 {
+  //  If location is in the header don't do anything
+  if (location < N64Header::Size)
+  {
+    return false;
+  }
+
   //  Get instruction which is bound to a 4 byte alignment
   uint32_t instruction = util::read<uint32_t>(ref(rom), location - (location % 4));
 
