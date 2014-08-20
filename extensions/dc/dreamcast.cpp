@@ -31,7 +31,9 @@ void DreamcastCorruption::initialize(std::string filename, std::vector<std::stri
   this->m_original_file = filename;
   this->m_temp_file = "tmp_" + std::to_string(std::time(0)) + ".img";
 
-  this->rom = std::make_unique<IMG>(filename, false);
+  std::cout << "Creating Dreamcast IMG" << std::endl;
+
+  //this->rom = std::make_unique<IMG>(filename, true);
   this->m_saved = false;
 }
 

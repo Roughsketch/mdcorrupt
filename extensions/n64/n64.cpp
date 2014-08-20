@@ -19,6 +19,7 @@ void N64Corruption::initialize(std::string filename, std::vector<std::string>& a
 {
   // Read the rom file
   rom = util::read_file(filename);
+  convert_to_z64(rom);
 
   header = std::make_unique<N64Header>(rom);
   info = std::make_unique<CorruptionInfo>(args);
@@ -167,33 +168,30 @@ void N64Corruption::save(std::string filename)
   }
 }
 
-void N64Corruption::convert_z64(std::string filename)
+void N64Corruption::convert_to_z64(std::vector<uint8_t>& data)
 {
-  uint32_t size = static_cast<uint32_t>(boost::filesystem::file_size(filename));
-  std::string extension = boost::filesystem::extension(filename);
-  std::vector<uint8_t> data(size);
+  uint32_t size = data.size();
 
-  std::ifstream ifs(filename, std::ios::binary);
-  std::ofstream ofs(filename.substr(0, filename.length() - 3) + "z64", std::ios::binary);
-
-  ifs.read(reinterpret_cast<char *>(&data[0]), size);
-
-  if (extension == ".n64")
+  if (data[1] == 0x80)  //  V64 Format
   {
     for (uint32_t i = 0; i < size; i += 2)
     {
-      uint8_t temp = data[i];
-      data[i] = data[i + 1];
-      data[i + 1] = temp;
+      uint8_t temp = data[i + 1];
+      data[i + 1] = data[i];
+      data[i] = temp;
     }
   }
-  else if (extension == ".v64")
+  else if (data[3] == 0x80) //  N64 Format
   {
+    for (uint32_t i = 0; i < size; i += 4)
+    {
+      uint32_t temp = util::read<uint32_t>(data, i);
+      temp = util::swap_endian<uint32_t>(temp);
 
+      data[i] = temp & 0xFF;
+      data[i + 1] = (temp >> 8) & 0xFF;
+      data[i + 2] = (temp >> 16) & 0xFF;
+      data[i + 3] = (temp >> 24) & 0xFF;
+    }
   }
-
-  ofs.write(reinterpret_cast<char *>(&data[0]), size);
-
-  ofs.close();
-  ifs.close();
 }

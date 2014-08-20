@@ -78,7 +78,7 @@ namespace yay0
   }
 
 
-  std::vector<uint8_t> decode(const std::vector<uint8_t>& src)
+  std::vector<uint8_t> decode(std::vector<uint8_t>& src)
   {
     if (util::read(src, 0, 4) != "Yay0")
     {

@@ -72,7 +72,7 @@ public:
   virtual void print_header();
   virtual void save(std::string filename);
 
-  static void convert_z64(std::string filename);
+  void convert_to_z64(std::vector<uint8_t>& data);
 
 private:
   std::unique_ptr<N64Header> header;

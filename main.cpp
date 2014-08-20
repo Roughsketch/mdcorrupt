@@ -167,7 +167,7 @@ std::vector<std::string> split_args(std::string args)
 void parse(std::vector<std::string> args)
 {
   static std::vector<std::string> accepted_extentions = {
-    ".nes", ".smc", ".sfc", ".z64", ".gb", ".gbc", ".gba", ".nds", ".img", ".bin", ".md", ".smd", ".cdi"
+    ".nes", ".smc", ".sfc", ".z64", ".n64", ".v64", ".gb", ".gbc", ".gba", ".nds", ".img", ".bin", ".md", ".smd", ".cdi"
   };
 
   std::string file(args[0]);
@@ -250,6 +250,12 @@ void parse(std::vector<std::string> args)
     args.erase(std::remove(args.begin(), args.end(), "--playstation"), args.end());
     corrupt<PSXCorruption>(file, args);
   }
+  else if (std::find(args.begin(), args.end(), "--dreamcast") != args.end())
+  {
+    //debug::cout << "Playstation" << std::endl;
+    args.erase(std::remove(args.begin(), args.end(), "--dreamcast"), args.end());
+    corrupt<DreamcastCorruption>(file, args);
+  }
   else if (extension == ".nes")
   {
     //debug::cout << "NES" << std::endl;
@@ -260,7 +266,7 @@ void parse(std::vector<std::string> args)
     std::cout << "SNES" << std::endl;
     corrupt<SNESCorruption>(file, args);
   }
-  else if (extension == ".z64")
+  else if (extension == ".z64" || extension == ".v64" || extension == ".n64")
   {
     //debug::cout << "N64" << std::endl;
     corrupt<N64Corruption>(file, args);
