@@ -190,7 +190,7 @@ void parse(std::vector<std::string> args)
     mz_bool status = mz_zip_reader_init_file(&zip_archive, file.c_str(), 0);
     if (!status)
     {
-      std::cout << "mz_zip_reader_init_file() failed!" << std::endl;
+      std::cerr << "mz_zip_reader_init_file() failed!" << std::endl;
       return;
     }
 
@@ -200,7 +200,7 @@ void parse(std::vector<std::string> args)
       mz_zip_archive_file_stat file_stat;
       if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat))
       {
-        std::cout << "mz_zip_reader_file_stat() failed!" << std::endl;
+        std::cerr << "mz_zip_reader_file_stat() failed!" << std::endl;
         mz_zip_reader_end(&zip_archive);
         return;
       }
@@ -239,70 +239,59 @@ void parse(std::vector<std::string> args)
   //  --nintendo handles GameCube and Wii files. Eventually it will also handle NDS.
   else if (std::find(args.begin(), args.end(), "--nintendo") != args.end())
   {
-    //debug::cout << "Nintendo" << std::endl;
     args.erase(std::remove(args.begin(), args.end(), "--nintendo"), args.end());
 
     NintendoFile::start(file, args);
   }
   else if (std::find(args.begin(), args.end(), "--playstation") != args.end())
   {
-    //debug::cout << "Playstation" << std::endl;
     args.erase(std::remove(args.begin(), args.end(), "--playstation"), args.end());
     corrupt<PSXCorruption>(file, args);
   }
   else if (std::find(args.begin(), args.end(), "--dreamcast") != args.end())
   {
-    //debug::cout << "Playstation" << std::endl;
     args.erase(std::remove(args.begin(), args.end(), "--dreamcast"), args.end());
     corrupt<DreamcastCorruption>(file, args);
   }
+  else if (std::find(args.begin(), args.end(), "--normal") != args.end())
+  {
+    args.erase(std::remove(args.begin(), args.end(), "--normal"), args.end());
+    corrupt<Corruption>(file, args);
+  }
   else if (extension == ".nes")
   {
-    //debug::cout << "NES" << std::endl;
     corrupt<NESCorruption>(file, args);
   }
   else if (extension == ".smc" || extension == ".sfc")
   {
-    std::cout << "SNES" << std::endl;
     corrupt<SNESCorruption>(file, args);
   }
   else if (extension == ".z64" || extension == ".v64" || extension == ".n64")
   {
-    //debug::cout << "N64" << std::endl;
     corrupt<N64Corruption>(file, args);
   }
-  //else if (extension == ".n64")
-  //{
-  //  N64Corruption::convert_z64(file);
-  //}
   else if (extension == ".gbc" || extension == ".gb")
   {
-    //debug::cout << "Game Boy" << std::endl;
     corrupt<GBCCorruption>(file, args);
   }
   else if (extension == ".gba")
   {
-    //debug::cout << "Game Boy Advance" << std::endl;
     corrupt<GBACorruption>(file, args);
   }
   else if (extension == ".nds")
   {
-    //debug::cout << "Nintendo DS" << std::endl;
     corrupt<NDSCorruption>(file, args);
   }
   else if (extension == ".img" || (extension == ".bin" && boost::filesystem::file_size(file) > (16 * 0x100000)))
   {
-    //debug::cout << "Playstation" << std::endl;
     corrupt<PSXCorruption>(file, args);
   }
   else if (extension == ".bin" || extension == ".md" || extension == ".smd")
   {
-    //debug::cout << "Sega Mega Drive / Sega Genesis" << std::endl;
     corrupt<GenesisCorruption>(file, args);
   }
   else if (extension == ".cdi")
   {
-    //debug::cout << "Normal" << std::endl;
     corrupt<DreamcastCorruption>(file, args);
   }
   else
@@ -322,7 +311,7 @@ void batch_thread(std::vector<std::string>& lines)
 
 int main(int argc, char *argv[])
 {
-  std::cout << "Corrupter v0.8.1" << std::endl;
+  std::cout << "Corrupter v0.8.5" << std::endl;
 
   if (argc == 1 || argc >= 2 && strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
   {
