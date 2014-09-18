@@ -69,7 +69,6 @@ template<typename T> void corrupt(std::string filename, std::vector<std::string>
     //debug::cout << "Printing." << std::endl;
     //rom->print_header();
 
-    //debug::cout << "Corrupting." << std::endl;
     rom->corrupt();
 
     rom->save("output");
@@ -311,7 +310,7 @@ void batch_thread(std::vector<std::string>& lines)
 
 int main(int argc, char *argv[])
 {
-  std::cout << "Corrupter v0.8.5" << std::endl;
+  std::cout << "Corrupter v0.8.7" << std::endl;
 
   if (argc == 1 || argc >= 2 && strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
   {

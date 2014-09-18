@@ -94,7 +94,7 @@ void PSXCorruption::corrupt()
       continue;
     }
 
-    for (uint32_t i = info->start(); (i + info->step() < data.size()) && (i < info->end()); i += info->step())
+    for (uint32_t i = info->start(); (i < data.size()) && (i < info->end()); i += info->step())
     {
       if (info->type() == CorruptionType::Shift)
       {

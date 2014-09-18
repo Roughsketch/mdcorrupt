@@ -127,15 +127,21 @@ std::vector<uint8_t> Entry::get(std::fstream& source)
 
   source.seekg(this->location(this->m_real_block_size) + SectionHeaderSize, std::ios::beg);
 
-  while (dataread < this->size() - this->m_logical_block_size)
+  if (this->size() <= this->m_logical_block_size)
   {
-    source.read(reinterpret_cast<char *>(&data[dataread]), this->m_logical_block_size);
-    dataread += this->m_logical_block_size;
-    source.seekg(junksize, std::ios::cur);
+    source.read(reinterpret_cast<char *>(&data[0]), this->size());
   }
+  else
+  {
+    while (dataread < this->size() - this->m_logical_block_size)
+    {
+      source.read(reinterpret_cast<char *>(&data[dataread]), this->m_logical_block_size);
+      dataread += this->m_logical_block_size;
+      source.seekg(junksize, std::ios::cur);
+    }
 
-  source.read(reinterpret_cast<char *>(&data[dataread]), this->size() - dataread);
-
+    source.read(reinterpret_cast<char *>(&data[dataread]), this->size() - dataread);
+  }
 
   source.seekg(fpos, std::ios::beg);
 
@@ -166,19 +172,27 @@ void Entry::write(std::fstream& dest, std::vector<uint8_t> data)
   //  Move to the file location
   dest.seekg(this->location(this->m_real_block_size) + SectionHeaderSize, std::ios::beg);
 
-  //  While we haven't written the full amount
-  while (written < data.size() - this->m_logical_block_size)
+  if (data.size() <= this->m_logical_block_size)
   {
-    //  Write the max concurrent size possible to the disk
-    dest.write(reinterpret_cast<char *>(&data[written]), this->m_logical_block_size);
-    //  Increase amount written
-    written += this->m_logical_block_size;
-    //  Skip the junk section at the end of the sector
-    dest.seekg(junksize, std::ios::cur);
+    //  Since we're less than block size we should do it in a single write
+    dest.write(reinterpret_cast<char *>(&data[0]), data.size());
   }
+  else
+  {
+    //  While we haven't written the full amount
+    while (written < data.size() - this->m_logical_block_size)
+    {
+      //  Write the max concurrent size possible to the disk
+      dest.write(reinterpret_cast<char *>(&data[written]), this->m_logical_block_size);
+      //  Increase amount written
+      written += this->m_logical_block_size;
+      //  Skip the junk section at the end of the sector
+      dest.seekg(junksize, std::ios::cur);
+    }
 
-  //  Write any extra data to the file if it has an odd size
-  dest.write(reinterpret_cast<char *>(&data[written]), data.size() - written);
+    //  Write any extra data to the file if it has an odd size
+    dest.write(reinterpret_cast<char *>(&data[written]), data.size() - written);
+  }
 
   //  Restore original position
   dest.seekg(fpos, std::ios::beg);

@@ -110,10 +110,12 @@ IMG::IMG(std::string filename, bool has_headers)
 
     this->root.back()->populate(img, this->real_block_size, this->block_size);
 
+    /*
     for (auto& file : this->root.back()->entries())
     {
       std::cout << this->root.back()->identifier() << ": " << file.name() << std::endl;
     }
+    */
   }
 
   img.close();
