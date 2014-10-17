@@ -64,4 +64,5 @@ protected:
 #include "genesis/genesis.h"
 #include "dc/dreamcast.h"
 #include "nintendo/nintendo.h"
+#include "psp/psp.h"
 #endif

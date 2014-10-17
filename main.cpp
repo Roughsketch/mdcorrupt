@@ -166,7 +166,7 @@ std::vector<std::string> split_args(std::string args)
 void parse(std::vector<std::string> args)
 {
   static std::vector<std::string> accepted_extentions = {
-    ".nes", ".smc", ".sfc", ".z64", ".n64", ".v64", ".gb", ".gbc", ".gba", ".nds", ".img", ".bin", ".md", ".smd", ".cdi"
+    ".nes", ".smc", ".sfc", ".z64", ".n64", ".v64", ".gb", ".gbc", ".gba", ".nds", ".img", ".bin", ".md", ".smd", ".cdi", ".iso"
   };
 
   std::string file(args[0]);
@@ -247,6 +247,11 @@ void parse(std::vector<std::string> args)
     args.erase(std::remove(args.begin(), args.end(), "--playstation"), args.end());
     corrupt<PSXCorruption>(file, args);
   }
+  else if (std::find(args.begin(), args.end(), "--psp") != args.end())
+  {
+    args.erase(std::remove(args.begin(), args.end(), "--psp"), args.end());
+    corrupt<PSPCorruption>(file, args);
+  }
   else if (std::find(args.begin(), args.end(), "--dreamcast") != args.end())
   {
     args.erase(std::remove(args.begin(), args.end(), "--dreamcast"), args.end());
@@ -310,7 +315,7 @@ void batch_thread(std::vector<std::string>& lines)
 
 int main(int argc, char *argv[])
 {
-  std::cout << "Corrupter v0.8.7" << std::endl;
+  std::cout << "Corrupter v0.8.8" << std::endl;
 
   if (argc == 1 || argc >= 2 && strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
   {
