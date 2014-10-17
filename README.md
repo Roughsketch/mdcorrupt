@@ -15,7 +15,7 @@ Homepage: http://www.maiddog.com/projects/corrupter
   * Accepted formats: .smc, .sfc
 * **N64**
   * Very crude opcode protection which may not be effective
-  * Accepted formats: .z64
+  * Accepted formats: .z64, .v64, .n64
 * **GameCube**
   * Protections based on individual file types
   * Accepted formats: None. Use --nintendo flag on individual files.
