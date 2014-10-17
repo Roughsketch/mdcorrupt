@@ -29,7 +29,7 @@ Homepage: http://www.maiddog.com/projects/corrupter
   * Opcode protection
   * Accepted formats: .gba
 * **NDS**
-  * ARM9 opcode protection, although it will be replaced with file protection soon
+  * Protections based on individual file types
   * Accepted formats: .nds
 * **Sega Genesis**
   * Vector table patching
@@ -37,3 +37,6 @@ Homepage: http://www.maiddog.com/projects/corrupter
 * **PlayStation 1**
   * No protection
   * Accepted formats: .bin, .img
+* **PlayStation Portable**
+  * No protection
+  * Accepted formats: .iso
