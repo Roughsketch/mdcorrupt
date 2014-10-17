@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 #include "util.h"
 
@@ -54,8 +55,8 @@ public:
   uint32_t size();
   std::string name();
 
-  std::vector<uint8_t> get(std::fstream& source);
-  void write(std::fstream& dest, std::vector<uint8_t> data);
+  std::vector<uint8_t> get(std::fstream& source, bool junk = true);
+  void write(std::fstream& dest, std::vector<uint8_t> data, bool skip = true);
 private:
   uint8_t m_size;
   uint8_t m_extended_size;

@@ -57,7 +57,7 @@ Path::~Path() {} // Nothing to destruct manually
 
   @param img - fstream reference of an open file of the img the path belongs to.
 */
-void Path::populate(std::fstream& img, uint32_t r_blocksize, uint32_t l_blocksize)
+void Path::populate(std::fstream& img, uint32_t r_blocksize, uint32_t l_blocksize, uint32_t padding)
 {
   //  Store original position so it can be restored later
   std::streampos fpos = img.tellg();
@@ -66,23 +66,41 @@ void Path::populate(std::fstream& img, uint32_t r_blocksize, uint32_t l_blocksiz
   uint32_t offset = this->location(r_blocksize);
   std::vector<uint8_t> raw(r_blocksize);
   uint8_t size = -1;
+  uint32_t remainder = 0;
 
   //  Read the data into the raw vector
-  img.seekg(offset + SectionHeaderSize, std::ios::beg);
+  img.seekg(offset + padding, std::ios::beg);
   img.read(reinterpret_cast<char *>(&raw[0]), r_blocksize);
 
   size = raw[0];  //  First size is the first byte
-  for (uint32_t i = 0; size != 0; size = raw[i])
-  {
-    //  Grab next entry given the size
-    std::vector<uint8_t> entry(raw.begin() + i, raw.begin() + i + size);
 
-    //  If the entry is a file then store it
-    if (Entry::is_file(entry))
+  while (remainder < 0x30)
+  {
+    remainder = l_blocksize;
+
+    for (uint32_t i = 0; size != 0; size = raw[i])
     {
-      this->m_entries.push_back(Entry(entry, r_blocksize, l_blocksize));
+      remainder -= size;
+      //  Grab next entry given the size
+      std::vector<uint8_t> entry(raw.begin() + i, raw.begin() + i + size);
+
+      //  If the entry is a file then store it
+      if (Entry::is_file(entry))
+      {
+        this->m_entries.push_back(Entry(entry, r_blocksize, l_blocksize));
+      }
+      i += size;  //  Move to next entry in the data
     }
-    i += size;  //  Move to next entry in the data
+
+    //  Read the data into the raw vector
+    if (padding)
+    {
+      img.seekg(padding, std::ios::cur);
+    }
+
+    img.read(reinterpret_cast<char *>(&raw[0]), r_blocksize);
+
+    size = raw[0];  //  First size is the first byte
   }
 
   //  Restore starting file position

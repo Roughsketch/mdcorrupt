@@ -108,7 +108,7 @@ IMG::IMG(std::string filename, bool has_headers)
     //std::cout << "Populating entries for " << this->root.back()->identifier() << std::endl;
     this->root.push_back(std::make_unique<Path>(raw, it - raw.begin()));
 
-    this->root.back()->populate(img, this->real_block_size, this->block_size);
+    this->root.back()->populate(img, this->real_block_size, this->block_size, has_headers ? SectionHeaderSize : 0);
 
     /*
     for (auto& file : this->root.back()->entries())
@@ -156,8 +156,11 @@ Entry IMG::operator[](std::string filename)
     //  For each Path in the list
     for (auto& path : this->root)
     {
+      std::string curpath = path->identifier();
+      std::transform(curpath.begin(), curpath.end(), curpath.begin(), ::toupper);
+
       //  Check if the parent of this Path is the last index and if the name matches the one being searched for
-      if (path->parent_index() == last_index && dir == path->identifier())
+      if (path->parent_index() == last_index && dir == curpath)
       {
         //  If it does set the next search up
         last_index = index;           //  Index of this directory
@@ -182,14 +185,18 @@ Entry IMG::operator[](std::string filename)
 
   if (parent == nullptr)
   {
-    throw FileNotFoundException("File " + filename + " not found.");
+    throw FileNotFoundException("File " + filename + " not found. No parent directory.");
   }
 
   //  For each file entry in the directory
   for (auto& entry : parent->entries())
   {
+    std::string curentry = entry.name();
+    std::transform(curentry.begin(), curentry.end(), curentry.begin(), ::toupper);
+
+    //std::cout << file << "\t" << curentry << "\t" << std::hex << entry.location(0x800) << std::dec << std::endl;
     //  If the file name matches then return the entry
-    if (entry.name() == file)
+    if (curentry == file)
     {
       return entry;
     }

@@ -19,7 +19,7 @@ public:
   Path(Path& obj);
   ~Path();
 
-  void populate(std::fstream& img, uint32_t r_blocksize, uint32_t l_blocksize);
+  void populate(std::fstream& img, uint32_t r_blocksize, uint32_t l_blocksize, uint32_t padding);
 
   uint32_t location();
   uint32_t location(uint32_t blocksize);

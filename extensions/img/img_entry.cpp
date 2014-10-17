@@ -28,13 +28,17 @@ Entry::Entry(std::vector<uint8_t>& data, uint32_t r_blocksize, uint32_t l_blocks
     m_identifier = ".";
   }
 
-  if (m_identifier.length() > 2 && m_identifier.substr(m_identifier.length() - 2) == ";1")
+  if (m_identifier.length() > 2 && m_identifier.find("."))
   {
     m_flags |= Attribute::Associated;
 
     m_extension = m_identifier.substr(m_identifier.find_last_of(".") + 1);
-    m_extension = m_extension.substr(0, m_extension.length() - 2);
-    m_identifier = m_identifier.substr(0, m_identifier.length() - 2);
+
+    if (m_identifier.find(";1") != std::string::npos)
+    {
+      m_extension = m_extension.substr(0, m_extension.length() - 2);
+      m_identifier = m_identifier.substr(0, m_identifier.length() - 2);
+    }
   }
   else
   {
@@ -81,7 +85,7 @@ bool Entry::is_file(std::vector<uint8_t>& entry)
   std::string identifier = util::read(entry, EntryOffset::FileIdentifier, file_id_length);
 
   //  Entry is a file if the entry ends with ;1 (at least for most cases)
-  return (identifier.length() > 2 && identifier.substr(identifier.length() - 2) == ";1");
+  return (identifier.length() > 2 && identifier.substr(identifier.length() - 2) == ";1") || (std::find(identifier.begin(), identifier.end(), '.') != identifier.end());
 }
 
 /*
@@ -118,14 +122,15 @@ std::string Entry::name()
 
   @return raw contents of the file.
 */
-std::vector<uint8_t> Entry::get(std::fstream& source)
+std::vector<uint8_t> Entry::get(std::fstream& source, bool junk)
 {
   std::streampos fpos = source.tellg();
   std::vector<uint8_t> data(this->size());
-  uint32_t dataread = 0;
-  uint32_t junksize = this->m_real_block_size - this->m_logical_block_size - Entry::SectionHeaderSize;
 
-  source.seekg(this->location(this->m_real_block_size) + SectionHeaderSize, std::ios::beg);
+  uint32_t dataread = 0;
+  uint32_t junksize = junk ? this->m_real_block_size - this->m_logical_block_size - Entry::SectionHeaderSize : 0;
+
+  source.seekg(this->location(this->m_real_block_size) + (junk ? SectionHeaderSize : 0), std::ios::beg);
 
   if (this->size() <= this->m_logical_block_size)
   {
@@ -137,7 +142,11 @@ std::vector<uint8_t> Entry::get(std::fstream& source)
     {
       source.read(reinterpret_cast<char *>(&data[dataread]), this->m_logical_block_size);
       dataread += this->m_logical_block_size;
-      source.seekg(junksize, std::ios::cur);
+
+      if (junk)
+      {
+        source.seekg(junksize, std::ios::cur);
+      }
     }
 
     source.read(reinterpret_cast<char *>(&data[dataread]), this->size() - dataread);
@@ -154,7 +163,7 @@ std::vector<uint8_t> Entry::get(std::fstream& source)
   @param dest - Open file stream of the img to write to
   @param data - Raw data that matches the size of the file it will overwrite
 */
-void Entry::write(std::fstream& dest, std::vector<uint8_t> data)
+void Entry::write(std::fstream& dest, std::vector<uint8_t> data, bool skip)
 {
   //  Data to write does not match the entry size, do nothing
   if (data.size() != this->size())
@@ -167,10 +176,10 @@ void Entry::write(std::fstream& dest, std::vector<uint8_t> data)
   //  Total bytes written to the file so far
   uint32_t written = 0;
   //  Amount of junk between sectors of the img
-  uint32_t junksize = this->m_real_block_size - this->m_logical_block_size - SectionHeaderSize;
+  uint32_t junksize = skip ? this->m_real_block_size - this->m_logical_block_size - SectionHeaderSize : 0;
 
   //  Move to the file location
-  dest.seekg(this->location(this->m_real_block_size) + SectionHeaderSize, std::ios::beg);
+  dest.seekg(this->location(this->m_real_block_size) + (skip ? SectionHeaderSize : 0), std::ios::beg);
 
   if (data.size() <= this->m_logical_block_size)
   {
@@ -186,6 +195,7 @@ void Entry::write(std::fstream& dest, std::vector<uint8_t> data)
       dest.write(reinterpret_cast<char *>(&data[written]), this->m_logical_block_size);
       //  Increase amount written
       written += this->m_logical_block_size;
+
       //  Skip the junk section at the end of the sector
       dest.seekg(junksize, std::ios::cur);
     }
