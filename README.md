@@ -3,7 +3,7 @@ mdcorrupt
 
 mdcorrupt is a specialized game corrupter focused on making corrupted game files less prone to crashing. In its current state it supports many game systems and many different file types with special protections for most systems. This project is a command line tool which is utilized in a GUI frontend called "VineCorrupt".
 
-Homepage: http://www.maiddog.com/projects/corrupter
+Homepage: http://www.maiddog.com/projects/corrupter/index.php
 
 ## Implemented Systems
 
